@@ -6,10 +6,14 @@
 #include "ast.h"
 #include "parser.h"
 
+const std::string bsversion = "0.0.3";
+
 int main() {
+    std::cout << "BarkScript version " << bsversion << std::endl;
     while (true) {
         //std::string input = "5+55";
         std::string input;
+        std::cout << "bs > ";
         std::getline(std::cin, input);
         std::cout << std::endl;
         Lexer lexer = Lexer(input);
