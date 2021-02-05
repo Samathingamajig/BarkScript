@@ -2,6 +2,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 #include <string>
+#include <vector>
 #include "token.h"
 
 struct Lexer {
@@ -12,13 +13,15 @@ struct Lexer {
     int lineCount = 0;
     int inputLength;
     bool finished = false;
-    
+
     Lexer(std::string input);
 
     void readChar();
     char peekChar(int num);
     bool isNumeric(char c);
     Token nextToken();
+
+    std::vector<Token> tokenize();
 };
 
 #endif // !LEXER_H

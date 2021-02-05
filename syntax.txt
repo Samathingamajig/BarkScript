@@ -1,0 +1,7 @@
+expr     : term ((PLUS|MINUS) term)*
+
+term     : factor ((ASTERISK|F_SLASH) factor)*
+
+factor   : NUMBER
+
+

@@ -141,11 +141,17 @@
   <ItemGroup>
     <ClCompile Include="BarkScript.cpp" />
     <ClCompile Include="Lexer.cpp" />
+    <ClCompile Include="Parser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ast.h" />
     <ClInclude Include="lexer.h" />
+    <ClInclude Include="parser.h" />
     <ClInclude Include="token.h" />
     <ClInclude Include="tokens.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="syntax.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
