@@ -38,5 +38,18 @@
     <ClInclude Include="parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ast.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="syntax.txt" />
+    <ClInclude Include="error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="position.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="strings_with_arrows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

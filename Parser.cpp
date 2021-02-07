@@ -25,35 +25,49 @@ Token Parser::nextToken() {
     return currentToken;
 }
 
-std::shared_ptr<Node> Parser::factor() {
+ParseResult Parser::factor() {
+    ParseResult pr;
     Token token = currentToken;
     if (token.type == tokens::NUMBER) {
         nextToken();
-        Node temp = Node(nodetypes::Number, token);
-        return std::make_shared<Node>(temp);
+        return pr.success(std::make_shared<Node>(Node(nodetypes::Number, token)));
+    } else {
+        pr.registerPR(std::make_shared<Node>(Node(nodetypes::Error, token)));
+        return pr.failure(Error(token.positionStart, token.positionEnd, errortypes::InvalidSyntaxError, "Expected a number"));
     }
 }
 
-std::shared_ptr<Node> Parser::term() {
-    std::function<std::shared_ptr<Node>()> rule = [this]() { return factor(); };
+ParseResult Parser::term() {
+    std::function<ParseResult()> rule = [this]() { return factor(); };
     return binaryOperation(rule, { tokens::ASTERISK, tokens::F_SLASH });
 }
 
-std::shared_ptr<Node> Parser::expr() {
-    std::function<std::shared_ptr<Node>()> rule = [this]() { return term(); };
+ParseResult Parser::expr() {
+    std::function<ParseResult()> rule = [this]() { return term(); };
     return binaryOperation(rule, { tokens::PLUS, tokens::MINUS });
 }
 
-std::shared_ptr<Node> Parser::binaryOperation(std::function<std::shared_ptr<Node>()> rule, std::vector<std::string> allowedTokens) {
-    std::shared_ptr<Node> left = rule();
+ParseResult Parser::parse() {
+    ParseResult pr = expr();
+    if (!pr.hasError() && currentToken.type != tokens::EEOF) {
+        return pr.failure(Error(currentToken.positionStart, currentToken.positionEnd, errortypes::InvalidSyntaxError, "Expected +, -, *, /"));
+    }
+    return pr;
+}
+
+ParseResult Parser::binaryOperation(std::function<ParseResult()> rule, std::vector<std::string> allowedTokens) {
+    ParseResult pr;
+    std::shared_ptr<Node> left = pr.registerPR(rule());
+    if (pr.hasError()) return pr;
 
     while (in_array(currentToken.type, allowedTokens)) {
         Token operatorToken = currentToken;
         nextToken();
-        std::shared_ptr<Node> right = rule();
+        std::shared_ptr<Node> right = pr.registerPR(rule());
+        if (pr.hasError()) return pr;
         Node temp = Node(nodetypes::BinaryOperator, left, operatorToken, right);
         left = std::make_shared<Node>(temp);
     }
 
-    return left;
+    return pr.success(left);
 }

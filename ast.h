@@ -1,8 +1,8 @@
 #pragma once
 #ifndef AST_H
+#define AST_H
 #include <string>
-#include <iostream>
-#include <sstream>
+//#include <sstream>
 #include "token.h"
 
 namespace nodetypes {
@@ -10,6 +10,7 @@ namespace nodetypes {
 
     const string Number = "NUMBER";
     const string BinaryOperator = "BINOP";
+    const string Error = "ERROR";
 };
 
 struct Node {
@@ -26,16 +27,12 @@ struct Node {
     };
 
     Node(std::string nodeType, Token token) {
-        std::ostringstream temp;
-        temp << nodeType;
-        this->nodeType = temp.str();
+        this->nodeType = nodeType;
         this->token = token;
     }
 
     Node(std::string nodeType, std::shared_ptr<Node> leftNode, Token token, std::shared_ptr<Node> rightNode) {
-        std::ostringstream temp;
-        temp << nodeType;
-        this->nodeType = temp.str();
+        this->nodeType = nodeType;
         this->token = token;
         this->leftNode = leftNode;
         this->rightNode = rightNode;

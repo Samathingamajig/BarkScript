@@ -6,6 +6,37 @@
 #include <functional>
 #include "token.h"
 #include "ast.h"
+#include "error.h"
+
+struct ParseResult {
+    Error error;
+    std::shared_ptr<Node> node;
+
+    bool hasError() {
+        return error.isError;
+    }
+
+    std::shared_ptr<Node> registerPR(std::shared_ptr<Node> node) {
+        return node;
+    }
+
+    std::shared_ptr<Node> registerPR(ParseResult pr) {
+        if (pr.hasError()) {
+            this->error = pr.error;
+        }
+        return pr.node;
+    }
+
+    ParseResult success(std::shared_ptr<Node> node) {
+        this->node = node;
+        return *this;
+    }
+
+    ParseResult failure(Error error) {
+        this->error = error;
+        return *this;
+    }
+};
 
 struct Parser {
     Parser(std::vector<Token> tokens);
@@ -16,11 +47,12 @@ struct Parser {
 
     Token nextToken();
 
-    std::shared_ptr<Node> factor();
-    std::shared_ptr<Node> term();
-    std::shared_ptr<Node> expr();
+    ParseResult factor();
+    ParseResult term();
+    ParseResult expr();
+    ParseResult parse();
 
-    std::shared_ptr<Node> binaryOperation(std::function<std::shared_ptr<Node>()> rule, std::vector<std::string> allowedTokens);
+    ParseResult binaryOperation(std::function<ParseResult()> rule, std::vector<std::string> allowedTokens);
 };
 
 #endif // !PARSER_H

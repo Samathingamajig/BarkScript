@@ -2,8 +2,10 @@
 #include <vector>
 #include <memory>
 #include "tokens.h"
+#include "position.h"
+#include "error.h"
 
-Lexer::Lexer(std::string input) {
+Lexer::Lexer(std::string input, std::string filename) {
     this->input = input;
     this->inputLength = input.length();
     if (inputLength > 0) {
@@ -12,63 +14,60 @@ Lexer::Lexer(std::string input) {
         this->current = 0;
     }
 
-    // Constant starters
-    this->position = 0;
-    this->nextPosition = 1;
-    this->lineCount = 0;
+    this->position = Position(-1, 0, -1, filename, input);
+    this->position.advance();
     this->finished = false;
 }
 
 void Lexer::readChar() {
-    if (nextPosition >= inputLength) {
+    if (position.index + 1 >= inputLength) {
         current = 0;
     } else {
-        current = input[nextPosition];
+        current = input[position.index + 1];
     }
-    position = nextPosition;
-    nextPosition++;
+    position.advance();
 }
 
 char Lexer::peekChar(int num = 0) {
-    if (nextPosition + num >= inputLength) {
+    if (position.index + num + 1 >= inputLength) {
         return 0;
     } else {
-        return input[nextPosition + num];
+        return input[position.index + num + 1];
     }
 }
 
-Token Lexer::nextToken() {
+SingleLexResult Lexer::nextToken() {
     Token token;
 reset:
     switch (current) {
         case '+':
             {
-                token = Token(tokens::PLUS, "+", position, position, lineCount);
+                token = Token(tokens::PLUS, "+", position, position);
                 break;
             }
         case '-':
             {
-                token = Token(tokens::MINUS, "-", position, position, lineCount);
+                token = Token(tokens::MINUS, "-", position, position);
                 break;
             }
         case '*':
             {
-                token = Token(tokens::ASTERISK, "*", position, position, lineCount);
+                token = Token(tokens::ASTERISK, "*", position, position);
                 break;
             }
         case '/':
             {
-                token = Token(tokens::F_SLASH, "/", position, position, lineCount);
+                token = Token(tokens::F_SLASH, "/", position, position);
                 break;
             }
         case '(':
             {
-                token = Token(tokens::OPEN_PAREN, "(", position, position, lineCount);
+                token = Token(tokens::OPEN_PAREN, "(", position, position);
                 break;
             }
         case ')':
             {
-                token = Token(tokens::CLOSE_PAREN, ")", position, position, lineCount);
+                token = Token(tokens::CLOSE_PAREN, ")", position, position);
                 break;
             }
         case ' ':
@@ -79,19 +78,24 @@ reset:
         case '\0':
             {
                 finished = true;
-                return Token(tokens::EEOF, "", position, position, lineCount);
+                return Token(tokens::EEOF, "", position, position);
             }
         default:
             {
                 if (isNumeric(current)) {
-                    token = Token(tokens::NUMBER, std::string(1, current), position, position, lineCount);
+                    std::string value = std::string(1, current);
+                    Position positionStart = position.copy();
                     while (isNumeric(peekChar())) {
-                        token.value += peekChar();
+                        value += peekChar();
                         readChar();
                     }
+                    token = Token(tokens::NUMBER, value, positionStart, position);
                     break;
                 } else {
-                    token = Token(tokens::UNKNOWN, std::string(1, current), position, position, lineCount);
+                    Position positionStart = position.copy();
+                    char tempCurrent = current;
+                    readChar();
+                    return Error(positionStart, position, errortypes::IllegalCharError, std::string(1, '\'') + tempCurrent + "'");
                 }
             }
     }
@@ -103,10 +107,14 @@ bool Lexer::isNumeric(char c) {
     return 48 <= c && c <= 57;
 }
 
-std::vector<Token> Lexer::tokenize() {
+MultiLexResult Lexer::tokenize() {
     std::vector<Token> tokenized;
     while (!finished) {
-        tokenized.push_back(nextToken());
+        SingleLexResult slr = nextToken();
+        if (slr.error) {
+            return slr.error;
+        }
+        tokenized.push_back(slr.token);
     }
     return tokenized;
 }
