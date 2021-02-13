@@ -3,5 +3,5 @@ expr     : term ((PLUS|MINUS) term)*
 term     : factor ((ASTERISK|F_SLASH) factor)*
 
 factor   : NUMBER
-
-
+         : (PLUS|MINUS) factor
+         : OPEN_PAREN expr CLOSE_PAREN

@@ -31,6 +31,20 @@ ParseResult Parser::factor() {
     if (token.type == tokens::NUMBER) {
         nextToken();
         return pr.success(makeSharedNode(NumberNode(token)));
+    } else if (in_array(token.type, { tokens::PLUS, tokens::MINUS })) {
+        nextToken();
+        spNode factorRes = pr.registerPR(factor());
+        if (pr.hasError()) return pr;
+        return pr.success(makeSharedNode(UnaryOperatorNode(token, factorRes)));
+    } else if (token.type == tokens::OPEN_PAREN) {
+        nextToken();
+        spNode exprRes = pr.registerPR(expr());
+        if (pr.hasError()) return pr;
+        if (currentToken.type == tokens::CLOSE_PAREN) {
+            nextToken();
+            return pr.success(exprRes);
+        }
+        return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a ')'")));
     } else {
         pr.registerPR(makeSharedNode(ErrorNode(token)));
         return pr.failure(makeSharedError(InvalidSyntaxError(token.positionStart, token.positionEnd, "Expected a number")));

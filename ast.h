@@ -62,6 +62,18 @@ struct BinaryOperatorNode : Node {
     }
 };
 
+struct UnaryOperatorNode : Node {
+    UnaryOperatorNode(Token token, spNode rightNode) {
+        this->nodeType = "UNOP";
+        this->token = token;
+        this->rightNode = rightNode;
+    }
+
+    std::string to_string() override {
+        return "(" + token.value + ", " + rightNode->to_string() + ")";
+    }
+};
+
 struct ErrorNode : Node {
     ErrorNode(Token token) {
         this->nodeType = "ERROR";
