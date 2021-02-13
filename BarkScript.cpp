@@ -4,7 +4,7 @@
 #include "lexer.h"
 #include "parser.h"
 
-const std::string bsversion = "0.0.5";
+const std::string bsversion = "0.0.5.1";
 
 int main() {
     std::cout << "BarkScript version " << bsversion << std::endl;
