@@ -30,10 +30,10 @@ ParseResult Parser::factor() {
     Token token = currentToken;
     if (token.type == tokens::NUMBER) {
         nextToken();
-        return pr.success(std::make_shared<Node>(Node(nodetypes::Number, token)));
+        return pr.success(makeSharedNode(NumberNode(token)));
     } else {
-        pr.registerPR(std::make_shared<Node>(Node(nodetypes::Error, token)));
-        return pr.failure(Error(token.positionStart, token.positionEnd, errortypes::InvalidSyntaxError, "Expected a number"));
+        pr.registerPR(makeSharedNode(ErrorNode(token)));
+        return pr.failure(makeSharedError(InvalidSyntaxError(token.positionStart, token.positionEnd, "Expected a number")));
     }
 }
 
@@ -50,23 +50,22 @@ ParseResult Parser::expr() {
 ParseResult Parser::parse() {
     ParseResult pr = expr();
     if (!pr.hasError() && currentToken.type != tokens::EEOF) {
-        return pr.failure(Error(currentToken.positionStart, currentToken.positionEnd, errortypes::InvalidSyntaxError, "Expected +, -, *, /"));
+        return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected +, -, *, /")));
     }
     return pr;
 }
 
 ParseResult Parser::binaryOperation(std::function<ParseResult()> rule, std::vector<std::string> allowedTokens) {
     ParseResult pr;
-    std::shared_ptr<Node> left = pr.registerPR(rule());
+    spNode left = pr.registerPR(rule());
     if (pr.hasError()) return pr;
 
     while (in_array(currentToken.type, allowedTokens)) {
         Token operatorToken = currentToken;
         nextToken();
-        std::shared_ptr<Node> right = pr.registerPR(rule());
+        spNode right = pr.registerPR(rule());
         if (pr.hasError()) return pr;
-        Node temp = Node(nodetypes::BinaryOperator, left, operatorToken, right);
-        left = std::make_shared<Node>(temp);
+        left = makeSharedNode(BinaryOperatorNode(left, operatorToken, right));
     }
 
     return pr.success(left);

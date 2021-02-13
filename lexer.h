@@ -8,26 +8,28 @@
 
 struct SingleLexResult {
     Token token;
-    Error error;
+    spError error = nullptr;
 
     SingleLexResult(Token token) {
         this->token = token;
     }
 
-    SingleLexResult(Error error) {
+    SingleLexResult(spError error) {
         this->error = error;
     }
 };
 
 struct MultiLexResult {
     std::vector<Token> tokenized;
-    Error error;
+    spError error = nullptr;
+
+    bool hasError() { return error != nullptr; }
 
     MultiLexResult(std::vector<Token> tokenized) {
         this->tokenized = tokenized;
     }
 
-    MultiLexResult(Error error) {
+    MultiLexResult(spError error) {
         this->error = error;
     }
 };

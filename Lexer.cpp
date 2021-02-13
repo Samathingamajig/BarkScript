@@ -41,63 +41,63 @@ SingleLexResult Lexer::nextToken() {
 reset:
     switch (current) {
         case '+':
-            {
-                token = Token(tokens::PLUS, "+", position, position);
-                break;
-            }
+        {
+            token = Token(tokens::PLUS, "+", position, position);
+            break;
+        }
         case '-':
-            {
-                token = Token(tokens::MINUS, "-", position, position);
-                break;
-            }
+        {
+            token = Token(tokens::MINUS, "-", position, position);
+            break;
+        }
         case '*':
-            {
-                token = Token(tokens::ASTERISK, "*", position, position);
-                break;
-            }
+        {
+            token = Token(tokens::ASTERISK, "*", position, position);
+            break;
+        }
         case '/':
-            {
-                token = Token(tokens::F_SLASH, "/", position, position);
-                break;
-            }
+        {
+            token = Token(tokens::F_SLASH, "/", position, position);
+            break;
+        }
         case '(':
-            {
-                token = Token(tokens::OPEN_PAREN, "(", position, position);
-                break;
-            }
+        {
+            token = Token(tokens::OPEN_PAREN, "(", position, position);
+            break;
+        }
         case ')':
-            {
-                token = Token(tokens::CLOSE_PAREN, ")", position, position);
-                break;
-            }
+        {
+            token = Token(tokens::CLOSE_PAREN, ")", position, position);
+            break;
+        }
         case ' ':
-            {
-                readChar();
-                goto reset;
-            }
+        {
+            readChar();
+            goto reset;
+        }
         case '\0':
-            {
-                finished = true;
-                return Token(tokens::EEOF, "", position, position);
-            }
+        {
+            finished = true;
+            return Token(tokens::EEOF, "", position, position);
+        }
         default:
-            {
-                if (isNumeric(current)) {
-                    std::string value = std::string(1, current);
-                    Position positionStart = position.copy();
-                    while (isNumeric(peekChar())) {
-                        value += peekChar();
-                        readChar();
-                    }
-                    token = Token(tokens::NUMBER, value, positionStart, position);
-                    break;
-                } else {
-                    Position positionStart = position.copy();
-                    char tempCurrent = current;
+        {
+            if (isNumeric(current)) {
+                std::string value = std::string(1, current);
+                Position positionStart = position.copy();
+                while (isNumeric(peekChar())) {
+                    value += peekChar();
                     readChar();
-                    return Error(positionStart, position, errortypes::IllegalCharError, std::string(1, '\'') + tempCurrent + "'");
                 }
+                token = Token(tokens::NUMBER, value, positionStart, position);
+                break;
+            } else {
+                Position positionStart = position.copy();
+                char tempCurrent = current;
+                readChar();
+                return makeSharedError(IllegalCharError(positionStart, position, std::string(1, '\'') + tempCurrent + "'"));
             }
+        }
     }
     readChar();
     return token;

@@ -9,12 +9,10 @@
 #include "error.h"
 
 struct ParseResult {
-    Error error;
+    spError error = nullptr;
     std::shared_ptr<Node> node;
 
-    bool hasError() {
-        return error.isError;
-    }
+    bool hasError() { return error != nullptr; }
 
     std::shared_ptr<Node> registerPR(std::shared_ptr<Node> node) {
         return node;
@@ -32,7 +30,7 @@ struct ParseResult {
         return *this;
     }
 
-    ParseResult failure(Error error) {
+    ParseResult failure(spError error) {
         this->error = error;
         return *this;
     }

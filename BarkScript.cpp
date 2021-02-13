@@ -4,7 +4,7 @@
 #include "lexer.h"
 #include "parser.h"
 
-const std::string bsversion = "0.0.4";
+const std::string bsversion = "0.0.5";
 
 int main() {
     std::cout << "BarkScript version " << bsversion << std::endl;
@@ -16,8 +16,8 @@ int main() {
         std::cout << std::endl;
         Lexer lexer = Lexer(input);
         MultiLexResult mlr = lexer.tokenize();
-        if (mlr.error) {
-            std::cout << mlr.error.to_string() << std::endl;
+        if (mlr.hasError()) {
+            std::cout << mlr.error->to_string() << std::endl;
             std::cout << "--------------------------" << std::endl;
             continue;
         }
@@ -29,7 +29,7 @@ int main() {
         ParseResult abSyTree = parser.parse();
         if (!abSyTree.hasError())
             std::cout << abSyTree.node->to_string() << std::endl;
-        else std::cout << abSyTree.error.to_string() << std::endl;
+        else std::cout << abSyTree.error->to_string() << std::endl;
         std::cout << "--------------------------" << std::endl;
     }
 }

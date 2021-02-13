@@ -15,7 +15,7 @@ struct Token {
         type = "UNDEFINED_TYPE";
         value = "NULL";
     }
-    
+
     Token(std::string type, std::string value, Position positionStart, Position positionEnd) {
         this->type = type;
         this->value = value;

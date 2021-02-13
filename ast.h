@@ -2,7 +2,6 @@
 #ifndef AST_H
 #define AST_H
 #include <string>
-//#include <sstream>
 #include "token.h"
 
 namespace nodetypes {
@@ -13,34 +12,65 @@ namespace nodetypes {
     const string Error = "ERROR";
 };
 
+struct Node;
+
+typedef std::shared_ptr<Node> spNode;
+
+// Polymorphism without having to cast to unknown types later on
+// https://stackoverflow.com/a/42539569/12101554
+// https://ideone.com/4jdhfZ
+template<class NodeType>
+spNode makeSharedNode(NodeType&& node) {
+    return std::make_shared<std::remove_reference_t<NodeType>>(std::forward<NodeType>(node));
+}
+
 struct Node {
     std::string nodeType;
     Token token;
-    std::string to_string() {
-        if (nodeType == nodetypes::Number) {
-            return token.value;
-        } else if (nodeType == nodetypes::BinaryOperator) {
-            return "(" + leftNode->to_string() + ", " + token.value + ", " + rightNode->to_string() + ")";
-        } else {
-            return "Not implemented! " + nodeType;
-        }
+    std::string virtual to_string() {
+        return "Not implemented! " + nodeType;
     };
 
-    Node(std::string nodeType, Token token) {
-        this->nodeType = nodeType;
+    Node() {}
+
+
+    spNode leftNode;
+    spNode rightNode;
+};
+
+struct NumberNode : Node {
+    NumberNode(Token token) {
+        this->nodeType = "NUMBER";
         this->token = token;
     }
 
-    Node(std::string nodeType, std::shared_ptr<Node> leftNode, Token token, std::shared_ptr<Node> rightNode) {
-        this->nodeType = nodeType;
+    std::string to_string() override {
+        return token.value;
+    }
+};
+
+struct BinaryOperatorNode : Node {
+    BinaryOperatorNode(spNode leftNode, Token token, spNode rightNode) {
+        this->nodeType = "BINOP";
         this->token = token;
         this->leftNode = leftNode;
         this->rightNode = rightNode;
     }
 
+    std::string to_string() override {
+        return "(" + leftNode->to_string() + ", " + token.value + ", " + rightNode->to_string() + ")";
+    }
+};
 
-    std::shared_ptr<Node> leftNode;
-    std::shared_ptr<Node> rightNode;
+struct ErrorNode : Node {
+    ErrorNode(Token token) {
+        this->nodeType = "ERROR";
+        this->token = token;
+    }
+
+    std::string to_string() override {
+        return token.value;
+    }
 };
 
 #endif // !AST_H
