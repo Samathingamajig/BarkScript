@@ -1,0 +1,2 @@
+run="chmod +x build/BarkScript && ./build/BarkScript"
+language="cpp"
