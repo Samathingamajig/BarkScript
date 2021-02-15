@@ -19,7 +19,7 @@ Parser::Parser(std::vector<Token> tokens) {
 
 Token Parser::nextToken() {
     tokenIndex++;
-    if (tokenIndex < tokens.size()) {
+    if ((unsigned) tokenIndex < tokens.size()) {
         currentToken = tokens[tokenIndex];
     }
     return currentToken;
@@ -62,10 +62,6 @@ ParseResult Parser::expr() {
 }
 
 ParseResult Parser::parse() {
-    if (currentToken.type == tokens::EEOF) {
-        ParseResult pr;
-        return pr.success(makeSharedNode(Node()));
-    }
     ParseResult pr = expr();
     if (!pr.hasError() && currentToken.type != tokens::EEOF) {
         return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected +, -, *, /")));

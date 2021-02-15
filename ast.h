@@ -2,13 +2,16 @@
 #ifndef AST_H
 #define AST_H
 #include <string>
+#include <memory>
 #include "token.h"
+#include "position.h"
 
 namespace nodetypes {
     using namespace std;
 
     const string Number = "NUMBER";
     const string BinaryOperator = "BINOP";
+    const string UnaryOperator = "UNOP";
     const string Error = "ERROR";
 };
 
@@ -27,12 +30,14 @@ spNode makeSharedNode(NodeType&& node) {
 struct Node {
     std::string nodeType;
     Token token;
+    Position positionStart;
+    Position positionEnd;
+
     std::string virtual to_string() {
         return "Not implemented! " + nodeType;
     };
 
     Node() {}
-
 
     spNode leftNode;
     spNode rightNode;
@@ -40,8 +45,10 @@ struct Node {
 
 struct NumberNode : Node {
     NumberNode(Token token) {
-        this->nodeType = "NUMBER";
+        this->nodeType = nodetypes::Number;
         this->token = token;
+        this->positionStart = token.positionStart;
+        this->positionEnd = token.positionEnd;
     }
 
     std::string to_string() override {
@@ -51,32 +58,36 @@ struct NumberNode : Node {
 
 struct BinaryOperatorNode : Node {
     BinaryOperatorNode(spNode leftNode, Token token, spNode rightNode) {
-        this->nodeType = "BINOP";
+        this->nodeType = nodetypes::BinaryOperator;
         this->token = token;
         this->leftNode = leftNode;
         this->rightNode = rightNode;
+        this->positionStart = leftNode->positionStart;
+        this->positionEnd = rightNode->positionEnd;
     }
 
     std::string to_string() override {
-        return "(" + leftNode->to_string() + ", " + token.value + ", " + rightNode->to_string() + ")";
+        return "(" + leftNode->to_string() + ", " + token.type + ", " + rightNode->to_string() + ")";
     }
 };
 
 struct UnaryOperatorNode : Node {
     UnaryOperatorNode(Token token, spNode rightNode) {
-        this->nodeType = "UNOP";
+        this->nodeType = nodetypes::UnaryOperator;
         this->token = token;
         this->rightNode = rightNode;
+        this->positionStart = token.positionStart;
+        this->positionEnd = rightNode->positionEnd;
     }
 
     std::string to_string() override {
-        return "(" + token.value + ", " + rightNode->to_string() + ")";
+        return "(" + token.type + ", " + rightNode->to_string() + ")";
     }
 };
 
 struct ErrorNode : Node {
     ErrorNode(Token token) {
-        this->nodeType = "ERROR";
+        this->nodeType = nodetypes::Error;
         this->token = token;
     }
 

@@ -3,6 +3,7 @@
 #define ERROR_H
 #include <string>
 #include "position.h"
+#include "context.h"
 #include "strings_with_arrows.h"
 
 namespace errortypes {
@@ -10,6 +11,7 @@ namespace errortypes {
 
     const string IllegalCharError = "IllegalCharError";
     const string InvalidSyntaxError = "InvalidSyntaxError";
+    const string RuntimeError = "RuntimeError";
 }
 
 struct Error;
@@ -41,7 +43,7 @@ struct Error {
         this->isError = true;
     }
 
-    std::string to_string() {
+    std::string virtual to_string() {
         std::string output = type + ": " + details + '\n';
         output += "File " + positionStart.filename + ", line " + std::to_string(positionStart.lineNumber + 1);
         output += "\n\n";
@@ -67,6 +69,40 @@ struct InvalidSyntaxError : Error {
         this->type = errortypes::InvalidSyntaxError;
         this->details = details;
         this->isError = true;
+    }
+};
+
+struct RuntimeError : Error {
+    spContext context;
+
+    RuntimeError(Position positionStart, Position positionEnd, std::string details, spContext context) {
+        this->positionStart = positionStart;
+        this->positionEnd = positionEnd;
+        this->type = errortypes::RuntimeError;
+        this->details = details;
+        this->context = context;
+    }
+
+    std::string to_string() override {
+        std::string output = generateTraceback();
+        output += type + ": " + details;
+        output += "\n\n";
+        output += strings_with_arrows(positionStart.filetext, positionStart, positionEnd);
+        return output;
+    }
+
+    std::string generateTraceback() {
+        std::string output = "";
+        Position pos = positionStart;
+        spContext ctx = context;
+
+        while (ctx != nullptr) {
+            output = "  File \"" + pos.filename + "\", line " + std::to_string(pos.lineNumber) + ", in \"" + ctx->displayName + "\"\n" + output;
+            pos = ctx->parentEntryPosition;
+            ctx = ctx->parent;
+        }
+
+        return "Traceback (most recent call last):\n" + output;
     }
 };
 

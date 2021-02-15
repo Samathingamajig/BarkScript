@@ -12,7 +12,7 @@ inline std::string strings_with_arrows(std::string text, Position positionStart,
     // Calculate indices
     int indexStart = text.substr(0, positionStart.index).rfind('\n');
     if (indexStart < 0) indexStart = 0;
-    int indexEnd = text.size() - 1 >= indexStart ? -1 : text.substr(indexStart + 1).find('\n');
+    int indexEnd = text.size() - 1 >= (unsigned) indexStart ? -1 : text.substr(indexStart + 1).find('\n');
     if (indexEnd < 0) indexEnd = text.size(); else indexEnd += indexEnd + 1;
 
     // Find the number of lines

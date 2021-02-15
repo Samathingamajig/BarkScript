@@ -85,8 +85,12 @@ reset:
             if (isNumeric(current)) {
                 std::string value = std::string(1, current);
                 Position positionStart = position.copy();
-                while (isNumeric(peekChar())) {
+                bool period = false;
+                while (isNumeric(peekChar()) || (peekChar() == '.' && !period)) {
                     value += peekChar();
+                    if (peekChar() == '.') {
+                        period = true;
+                    }
                     readChar();
                 }
                 token = Token(tokens::NUMBER, value, positionStart, position);

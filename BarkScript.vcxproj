@@ -140,13 +140,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BarkScript.cpp" />
+    <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="Lexer.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="Parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ast.h" />
+    <ClInclude Include="context.h" />
     <ClInclude Include="error.h" />
+    <ClInclude Include="interpreter.h" />
     <ClInclude Include="lexer.h" />
+    <ClInclude Include="object.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="position.h" />
     <ClInclude Include="strings_with_arrows.h" />

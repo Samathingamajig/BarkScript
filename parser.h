@@ -10,11 +10,11 @@
 
 struct ParseResult {
     spError error = nullptr;
-    std::shared_ptr<Node> node;
+    spNode node;
 
     bool hasError() { return error != nullptr; }
 
-    std::shared_ptr<Node> registerPR(std::shared_ptr<Node> node) {
+    spNode registerPR(spNode node) {
         return node;
     }
 
