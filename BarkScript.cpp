@@ -6,7 +6,7 @@
 #include "object.h"
 #include "interpreter.h"
 
-const std::string bsversion = "0.0.9";
+const std::string bsversion = "0.0.10";
 
 int main() {
     std::cout << "BarkScript version " << bsversion << std::endl;

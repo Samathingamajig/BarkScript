@@ -8,13 +8,13 @@ namespace tokens {
     using namespace std;
 
     // Math Symbols
-    const string PLUS = "+";
-    const string MINUS = "-";
-    const string ASTERISK = "*";
-    const string F_SLASH = "/";
-    const string DOUBLE_ASTERISK = "**";
-    const string OPEN_PAREN = "(";
-    const string CLOSE_PAREN = ")";
+    const string PLUS = "PLUS";
+    const string MINUS = "MINUS";
+    const string ASTERISK = "ASTERISK";
+    const string F_SLASH = "F_SLASH";
+    const string DOUBLE_ASTERISK = "DOUBLE_ASTERISK";
+    const string OPEN_PAREN = "OPEN_PAREN";
+    const string CLOSE_PAREN = "CLOSE_PAREN";
 
     // Data types
     const string NUMBER = "NUMBER";
