@@ -6,7 +6,7 @@
 #include "object.h"
 #include "interpreter.h"
 
-const std::string bsversion = "0.0.11";
+const std::string bsversion = "0.0.12";
 
 int main() {
     std::cout << "BarkScript version " << bsversion << std::endl;
@@ -16,6 +16,9 @@ int main() {
         std::cout << "bs > ";
         std::getline(std::cin, input);
         std::cout << std::endl;
+        if (std::cin.eof()) {
+            return 0;
+        }
         Lexer lexer = Lexer(input);
         MultiLexResult mlr = lexer.tokenize();
         if (mlr.hasError()) {

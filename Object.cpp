@@ -11,6 +11,11 @@ bool didUnderflow(double value) {
     return -std::numeric_limits<double>::max() > value;
 }
 
+template <class T>
+RuntimeResult notImplemented(RuntimeResult rt, T self, spObject other, std::string function) {
+    return rt.failure(makeSharedError(RuntimeError(self->positionStart, other->positionEnd, function + " is not implemented between " + self->type + " and " + other->type + "!", self->context)));
+}
+
 void Object::setPosition(Position positionStart, Position positionEnd) {
     this->positionStart = positionStart;
     this->positionEnd = positionEnd;
@@ -64,6 +69,8 @@ std::string Number::to_string() {
 RuntimeResult Number::binary_plus(spObject other) {
     RuntimeResult rt;
 
+    if (other->type != objecttypes::Number) return notImplemented(rt, this, other, "binary_plus");
+
     if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
     if (this->isInfinity || other->isInfinity) {
         if (this->sign == other->sign) {
@@ -83,6 +90,8 @@ RuntimeResult Number::binary_plus(spObject other) {
 RuntimeResult Number::binary_minus(spObject other) {
     RuntimeResult rt;
 
+    if (other->type != objecttypes::Number) return notImplemented(rt, this, other, "binary_minus");
+
     if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
     if (this->isInfinity || other->isInfinity) {
         if (this->sign != other->sign) {
@@ -101,6 +110,8 @@ RuntimeResult Number::binary_minus(spObject other) {
 
 RuntimeResult Number::binary_asterisk(spObject other) {
     RuntimeResult rt;
+
+    if (other->type != objecttypes::Number) return notImplemented(rt, this, other, "binary_asterisk");
 
     if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
     if (this->isInfinity || other->isInfinity) {
@@ -122,6 +133,8 @@ RuntimeResult Number::binary_asterisk(spObject other) {
 RuntimeResult Number::binary_f_slash(spObject other) {
     RuntimeResult rt;
 
+    if (other->type != objecttypes::Number) return notImplemented(rt, this, other, "binary_f_slash");
+
     if (other->isPureZero) return rt.failure(makeSharedError(RuntimeError(other->positionStart, other->positionEnd, "Division by 0", this->context)));
     if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
     if (this->isInfinity && other->isInfinity) return rt.success(makeSharedObject(Number("NaN")));
@@ -135,6 +148,8 @@ RuntimeResult Number::binary_f_slash(spObject other) {
 
 RuntimeResult Number::binary_double_asterisk(spObject other) {
     RuntimeResult rt;
+
+    if (other->type != objecttypes::Number) return notImplemented(rt, this, other, "binary_double_asterisk");
 
     if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
     if (other->isPureZero) return rt.success(makeSharedObject(Number(1)));
@@ -150,6 +165,8 @@ RuntimeResult Number::binary_double_asterisk(spObject other) {
 
 RuntimeResult Number::binary_double_f_slash(spObject other) {
     RuntimeResult rt;
+
+    if (other->type != objecttypes::Number) return notImplemented(rt, this, other, "binary_double_f_slash");
 
     if (other->isPureZero) return rt.failure(makeSharedError(RuntimeError(other->positionStart, other->positionEnd, "Floored division by 0", this->context)));
     spObject normalDivisionResult = rt.registerRT(this->binary_f_slash(other));
