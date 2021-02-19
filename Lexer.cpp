@@ -52,6 +52,12 @@ reset:
         }
         case '*':
         {
+            if (peekChar() == '*') {
+                Position start = position.copy();
+                readChar();
+                token = Token(tokens::DOUBLE_ASTERISK, "**", start, position);
+                break;
+            }
             token = Token(tokens::ASTERISK, "*", position, position);
             break;
         }

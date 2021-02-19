@@ -51,6 +51,7 @@ struct Object {
     RuntimeResult virtual binary_minus(spObject object) = 0;
     RuntimeResult virtual binary_asterisk(spObject object) = 0;
     RuntimeResult virtual binary_f_slash(spObject object) = 0;
+    RuntimeResult virtual binary_double_asterisk(spObject object) = 0;
 
     RuntimeResult virtual unary_plus() = 0;
     RuntimeResult virtual unary_minus() = 0;
@@ -66,6 +67,7 @@ struct Number : Object {
     RuntimeResult binary_minus(spObject object) override;
     RuntimeResult binary_asterisk(spObject object) override;
     RuntimeResult binary_f_slash(spObject object) override;
+    RuntimeResult binary_double_asterisk(spObject object) override;
 
     RuntimeResult unary_plus() override;
     RuntimeResult unary_minus() override;

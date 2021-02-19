@@ -1,7 +1,11 @@
-expr     : term ((PLUS|MINUS) term)*
+expr        : term ((PLUS|MINUS) term)*
 
-term     : factor ((ASTERISK|F_SLASH) factor)*
+term        : factor ((ASTERISK|F_SLASH) factor)*
 
-factor   : NUMBER
-         : (PLUS|MINUS) factor
-         : OPEN_PAREN expr CLOSE_PAREN
+factor      : (PLUS|MINUS) factor
+            : exponent
+
+exponent    : atom (DOUBLE_ASTERISK factor)*
+
+atom        : NUMBER
+            : OPEN_PAREN expr CLOSE_PAREN

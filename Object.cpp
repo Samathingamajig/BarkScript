@@ -1,5 +1,15 @@
 #include "object.h"
+#include <math.h>
 #include "interpreter.h"
+
+bool didOverflow(double value) {
+    return std::numeric_limits<double>::max() < value;
+}
+
+bool didUnderflow(double value) {
+    return -std::numeric_limits<double>::max() > value;
+}
+
 void Object::setPosition(Position positionStart, Position positionEnd) {
     this->positionStart = positionStart;
     this->positionEnd = positionEnd;
@@ -65,7 +75,10 @@ RuntimeResult Number::binary_plus(spObject object) {
             return rt.success(makeSharedObject(Number("NaN", 0)));
         }
     }
-    return rt.success(makeSharedObject(Number(this->doubleValue + object->doubleValue)));
+    double result = this->doubleValue + object->doubleValue;
+    if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
+    if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
+    return rt.success(makeSharedObject(Number(result)));
 }
 
 RuntimeResult Number::binary_minus(spObject object) {
@@ -81,7 +94,10 @@ RuntimeResult Number::binary_minus(spObject object) {
             return rt.success(makeSharedObject(Number("NaN")));
         }
     }
-    return rt.success(makeSharedObject(Number(this->doubleValue - object->doubleValue)));
+    double result = this->doubleValue - object->doubleValue;
+    if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
+    if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
+    return rt.success(makeSharedObject(Number(result)));
 }
 
 RuntimeResult Number::binary_asterisk(spObject object) {
@@ -98,7 +114,10 @@ RuntimeResult Number::binary_asterisk(spObject object) {
         //       1    ==         1    -> 1
         return rt.success(makeSharedObject(Number("Infinity", this->sign == object->sign)));
     }
-    return rt.success(makeSharedObject(Number(this->doubleValue * object->doubleValue)));
+    double result = this->doubleValue * object->doubleValue;
+    if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
+    if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
+    return rt.success(makeSharedObject(Number(result)));
 }
 
 RuntimeResult Number::binary_f_slash(spObject object) {
@@ -109,7 +128,25 @@ RuntimeResult Number::binary_f_slash(spObject object) {
     if (object->isPureZero) return rt.failure(makeSharedError(RuntimeError(object->positionStart, object->positionEnd, "Division by 0", this->context)));
     if (object->isInfinity) return rt.success(makeSharedObject(Number(0, this->sign == object->sign)));
     if (this->isInfinity) return rt.success(makeSharedObject(Number("Infinity", this->sign == object->sign)));
-    return rt.success(makeSharedObject(Number(this->doubleValue / object->doubleValue)));
+    double result = this->doubleValue / object->doubleValue;
+    if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
+    if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
+    return rt.success(makeSharedObject(Number(result)));
+}
+
+RuntimeResult Number::binary_double_asterisk(spObject object) {
+    RuntimeResult rt;
+
+    if (this->isNaN || object->isNaN) return rt.success(makeSharedObject(Number("NaN")));
+    if (object->isPureZero) return rt.success(makeSharedObject(Number(1)));
+    if (object->isInfinity && object->sign == +1) return rt.success(makeSharedObject(Number("Infinity")));
+    if (object->isInfinity && object->sign == -0) return rt.success(makeSharedObject(Number(0)));
+    if (this->isInfinity && object->sign == +1) return rt.success(makeSharedObject(Number("Infinity", this->sign)));
+    if (this->isInfinity && object->sign == -0) return rt.success(makeSharedObject(Number(0)));
+    double result = std::pow(this->doubleValue, object->doubleValue);
+    if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
+    if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
+    return rt.success(makeSharedObject(Number(result)));
 }
 
 RuntimeResult Number::unary_plus() {

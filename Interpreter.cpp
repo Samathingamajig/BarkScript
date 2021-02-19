@@ -67,6 +67,8 @@ RuntimeResult Interpreter::visitBinaryOperatorNode(spNode node, spContext contex
         result = left->binary_asterisk(right);
     } else if (optoken == tokens::F_SLASH) {
         result = left->binary_f_slash(right);
+    } else if (optoken == tokens::DOUBLE_ASTERISK) {
+        result = left->binary_double_asterisk(right);
     }
 
     if (result.hasError()) return rt.failure(result.error);

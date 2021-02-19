@@ -12,6 +12,7 @@ namespace tokens {
     const string MINUS = "-";
     const string ASTERISK = "*";
     const string F_SLASH = "/";
+    const string DOUBLE_ASTERISK = "**";
     const string OPEN_PAREN = "(";
     const string CLOSE_PAREN = ")";
 
