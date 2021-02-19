@@ -41,7 +41,7 @@ ParseResult Parser::atom() {
         }
         return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a ')'")));
     } else {
-        return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a number, '+', '-', or '('")));
+        return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a number, '+', '-', or a '('")));
     }
 }
 
@@ -65,7 +65,7 @@ ParseResult Parser::factor() {
 
 ParseResult Parser::term() {
     std::function<ParseResult()> rule = [this]() { return factor(); };
-    return binaryOperation(rule, { tokens::ASTERISK, tokens::F_SLASH });
+    return binaryOperation(rule, { tokens::ASTERISK, tokens::F_SLASH, tokens::DOUBLE_F_SLASH });
 }
 
 ParseResult Parser::expr() {
@@ -76,7 +76,7 @@ ParseResult Parser::expr() {
 ParseResult Parser::parse() {
     ParseResult pr = expr();
     if (!pr.hasError() && currentToken.type != tokens::EEOF) {
-        return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a '+', '-', '*', '/', '**', '('")));
+        return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a '+', '-', '*', '/', '**', '//', or a '('")));
     }
     return pr;
 }
@@ -100,26 +100,3 @@ ParseResult Parser::binaryOperation(std::function<ParseResult()> rule1, std::vec
 
     return pr.success(left);
 }
-
-//ParseResult Parser::binaryOperationRightToLeft(std::function<ParseResult()> rule, std::vector<std::string> allowedTokens) {
-//    ParseResult pr;
-//    spNode left = pr.registerPR(rule());
-//    if (pr.hasError()) return pr;
-//    std::vector<Token> tokenStack;
-//    std::vector<spNode> prStack = { left };
-//
-//    while (in_array(currentToken.type, allowedTokens)) {
-//        tokenStack.push_back(currentToken);
-//        nextToken();
-//        spNode next = pr.registerPR(rule());
-//        if (pr.hasError()) return pr;
-//        prStack.push_back(next);
-//    }
-//
-//    spNode result = prStack.back();
-//    for (int i = prStack.size() - 2; i >= 0; i++) {
-//        result = makeSharedNode(BinaryOperatorNode(prStack[i], tokenStack[i], result));
-//    }
-//
-//    return pr.success(result);
-//}

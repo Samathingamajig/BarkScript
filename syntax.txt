@@ -1,6 +1,6 @@
 expr        : term ((PLUS|MINUS) term)*
 
-term        : factor ((ASTERISK|F_SLASH) factor)*
+term        : factor ((ASTERISK|F_SLASH|DOUBLE_F_SLASH) factor)*
 
 factor      : (PLUS|MINUS) factor
             : exponent

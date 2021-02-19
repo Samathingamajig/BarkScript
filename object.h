@@ -34,6 +34,7 @@ struct Object {
     bool sign = +1;
     bool isInfinity = false;
     bool isNaN = false;
+    bool isPureDouble = false;
     bool isPureZero = false;
 
     std::string type = "UNKNOWN_OBJECT";
@@ -51,6 +52,7 @@ struct Object {
     RuntimeResult virtual binary_asterisk(spObject other) { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, other->positionEnd, "binary_asterisk for " + this->type + " is not implemented!", this->context))); };
     RuntimeResult virtual binary_f_slash(spObject other) { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, other->positionEnd, "binary_f_slash for " + this->type + " is not implemented!", this->context))); };
     RuntimeResult virtual binary_double_asterisk(spObject other) { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, other->positionEnd, "binary_double_asterisk for " + this->type + " is not implemented!", this->context))); };
+    RuntimeResult virtual binary_double_f_slash(spObject other) { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, other->positionEnd, "binary_double_f_slash for " + this->type + " is not implemented!", this->context))); };
 
     RuntimeResult virtual unary_plus() { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, this->positionEnd, "unary_plus for " + this->type + " is not implemented!", this->context))); };
     RuntimeResult virtual unary_minus() { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, this->positionEnd, "unary_minus for " + this->type + " is not implemented!", this->context))); };
@@ -67,6 +69,7 @@ struct Number : Object {
     RuntimeResult binary_asterisk(spObject other) override;
     RuntimeResult binary_f_slash(spObject other) override;
     RuntimeResult binary_double_asterisk(spObject other) override;
+    RuntimeResult binary_double_f_slash(spObject other) override;
 
     RuntimeResult unary_plus() override;
     RuntimeResult unary_minus() override;

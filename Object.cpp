@@ -23,6 +23,7 @@ void Object::setContext(spContext context) {
 Number::Number(double value, bool sign) {
     this->type = "Number";
     this->doubleValue = value;
+    this->isPureDouble = true;
     if (value < 0.0) this->sign = -0;
     if (value == 0) this->isPureZero = true;
 }
@@ -37,6 +38,7 @@ Number::Number(std::string value, bool sign) {
     } else {
         try {
             this->doubleValue = std::stod(value);
+            this->isPureDouble = true;
             if (this->doubleValue == 0) this->isPureZero = true;
         } catch (const std::out_of_range&) {
             this->isInfinity = true;
@@ -141,6 +143,19 @@ RuntimeResult Number::binary_double_asterisk(spObject other) {
     if (this->isInfinity && other->sign == +1) return rt.success(makeSharedObject(Number("Infinity", this->sign)));
     if (this->isInfinity && other->sign == -0) return rt.success(makeSharedObject(Number(0)));
     double result = std::pow(this->doubleValue, other->doubleValue);
+    if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
+    if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
+    return rt.success(makeSharedObject(Number(result)));
+}
+
+RuntimeResult Number::binary_double_f_slash(spObject other) {
+    RuntimeResult rt;
+
+    if (other->isPureZero) return rt.failure(makeSharedError(RuntimeError(other->positionStart, other->positionEnd, "Floored division by 0", this->context)));
+    spObject normalDivisionResult = rt.registerRT(this->binary_f_slash(other));
+    if (rt.hasError()) return rt;
+    if (!normalDivisionResult->isPureDouble) return rt;
+    double result = std::floor(normalDivisionResult->doubleValue);
     if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
     if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
     return rt.success(makeSharedObject(Number(result)));

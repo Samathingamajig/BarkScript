@@ -54,7 +54,6 @@ struct Parser {
 
     ParseResult binaryOperation(std::function<ParseResult()> rule, std::vector<std::string> allowedTokens);
     ParseResult binaryOperation(std::function<ParseResult()> rule1, std::vector<std::string> allowedTokens, std::function<ParseResult()> rule2);
-    //ParseResult binaryOperationRightToLeft(std::function<ParseResult()> rule, std::vector<std::string> allowedTokens);
 };
 
 #endif // !PARSER_H

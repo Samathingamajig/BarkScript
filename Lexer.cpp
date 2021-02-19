@@ -63,6 +63,12 @@ reset:
         }
         case '/':
         {
+            if (peekChar() == '/') {
+                Position start = position.copy();
+                readChar();
+                token = Token(tokens::DOUBLE_F_SLASH, "//", start, position);
+                break;
+            }
             token = Token(tokens::F_SLASH, "/", position, position);
             break;
         }
