@@ -3,8 +3,8 @@
 #define LEXER_H
 #include <string>
 #include <vector>
-#include "token.h"
-#include "error.h"
+#include "../token/token.h"
+#include "../error/error.h"
 
 struct SingleLexResult {
     Token token;

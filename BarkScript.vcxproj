@@ -140,23 +140,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BarkScript.cpp" />
-    <ClCompile Include="Interpreter.cpp" />
-    <ClCompile Include="Lexer.cpp" />
-    <ClCompile Include="Object.cpp" />
-    <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="interpreter/Interpreter.cpp" />
+    <ClCompile Include="lexer/Lexer.cpp" />
+    <ClCompile Include="object/Object.cpp" />
+    <ClCompile Include="parser/Parser.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ast.h" />
-    <ClInclude Include="context.h" />
-    <ClInclude Include="error.h" />
-    <ClInclude Include="interpreter.h" />
-    <ClInclude Include="lexer.h" />
-    <ClInclude Include="object.h" />
-    <ClInclude Include="parser.h" />
-    <ClInclude Include="position.h" />
-    <ClInclude Include="strings_with_arrows.h" />
-    <ClInclude Include="token.h" />
-    <ClInclude Include="tokens.h" />
+    <ClInclude Include="ast/ast.h" />
+    <ClInclude Include="context/context.h" />
+    <ClInclude Include="error/error.h" />
+    <ClInclude Include="interpreter/interpreter.h" />
+    <ClInclude Include="lexer/lexer.h" />
+    <ClInclude Include="object/object.h" />
+    <ClInclude Include="parser/parser.h" />
+    <ClInclude Include="position/position.h" />
+    <ClInclude Include="strings_with_arrows/strings_with_arrows.h" />
+    <ClInclude Include="token/token.h" />
+    <ClInclude Include="token/tokens.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="syntax.txt" />

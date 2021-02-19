@@ -1,10 +1,12 @@
 #include <iostream>
 #include <string>
 #include <memory>
-#include "lexer.h"
-#include "parser.h"
-#include "object.h"
-#include "interpreter.h"
+#include "token/token.h"
+#include "lexer/lexer.h"
+#include "parser/parser.h"
+#include "object/object.h"
+#include "interpreter/interpreter.h"
+#include "context/context.h"
 
 const std::string bsversion = "0.0.12";
 

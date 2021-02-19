@@ -4,9 +4,9 @@
 #include <vector>
 #include <memory>
 #include <functional>
-#include "token.h"
-#include "ast.h"
-#include "error.h"
+#include "../token/token.h"
+#include "../ast/ast.h"
+#include "../error/error.h"
 
 struct ParseResult {
     spError error = nullptr;

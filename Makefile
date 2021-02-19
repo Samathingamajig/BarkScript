@@ -1,14 +1,14 @@
-windowsvs : build BarkScript.cpp Lexer.cpp Parser.cpp Object.cpp Interpreter.cpp
+windowsvs : build BarkScript.cpp lexer/Lexer.cpp parser/Parser.cpp object/Object.cpp interpreter/Interpreter.cpp
 	.\build.bat
 
-linuxgpp : build BarkScript.cpp Lexer.cpp Parser.cpp Object.cpp Interpreter.cpp
-	g++ -o ./build/BarkScript -O2 -Wall BarkScript.cpp Lexer.cpp Parser.cpp Object.cpp Interpreter.cpp
+linuxgpp : build BarkScript.cpp lexer/Lexer.cpp parser/Parser.cpp object/Object.cpp interpreter/Interpreter.cpp
+	g++ -o ./build/BarkScript -O2 -Wall BarkScript.cpp lexer/Lexer.cpp parser/Parser.cpp object/Object.cpp interpreter/Interpreter.cpp
 
 cleanobj :
-	rm BarkScript.obj Lexer.obj Parser.obj Object.obj Interpreter.obj
+	rm *.obj
 
 cleanobjcmd :
-	del BarkScript.obj Lexer.obj Parser.obj Object.obj Interpreter.obj
+	del *.obj
 
 build :
 	mkdir build

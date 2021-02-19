@@ -3,8 +3,8 @@
 #define AST_H
 #include <string>
 #include <memory>
-#include "token.h"
-#include "position.h"
+#include "../token/token.h"
+#include "../position/position.h"
 
 namespace nodetypes {
     using namespace std;

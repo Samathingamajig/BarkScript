@@ -1,1 +1,1 @@
-"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat" && cl.exe /EHsc BarkScript.cpp Lexer.cpp Parser.cpp Object.cpp Interpreter.cpp /link /out:build/BarkScript.exe
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat" && cl.exe /EHsc BarkScript.cpp lexer/Lexer.cpp parser/Parser.cpp object/Object.cpp interpreter/Interpreter.cpp /link /out:build/BarkScript.exe

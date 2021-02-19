@@ -2,9 +2,9 @@
 #include <vector>
 #include <memory>
 #include <functional>
-#include "token.h"
-#include "tokens.h"
-#include "ast.h"
+#include "../token/token.h"
+#include "../token/tokens.h"
+#include "../ast/ast.h"
 
 // https://stackoverflow.com/a/20303915/12101554
 bool in_array(const std::string& value, const std::vector<std::string>& array) {

@@ -2,9 +2,9 @@
 #ifndef ERROR_H
 #define ERROR_H
 #include <string>
-#include "position.h"
-#include "context.h"
-#include "strings_with_arrows.h"
+#include "../position/position.h"
+#include "../context/context.h"
+#include "../strings_with_arrows/strings_with_arrows.h"
 
 namespace errortypes {
     using namespace std;

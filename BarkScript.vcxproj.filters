@@ -18,52 +18,52 @@
     <ClCompile Include="BarkScript.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Lexer.cpp">
+    <ClCompile Include="lexer/Lexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Parser.cpp">
+    <ClCompile Include="parser/Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Interpreter.cpp">
+    <ClCompile Include="interpreter/Interpreter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
+    <ClCompile Include="object/Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tokens.h">
+    <ClInclude Include="token/tokens.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lexer.h">
+    <ClInclude Include="lexer/lexer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="token.h">
+    <ClInclude Include="token/token.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="parser.h">
+    <ClInclude Include="parser/parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ast.h">
+    <ClInclude Include="ast/ast.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="syntax.txt" />
-    <ClInclude Include="error.h">
+    <ClInclude Include="error/error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="position.h">
+    <ClInclude Include="position/position.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="strings_with_arrows.h">
+    <ClInclude Include="strings_with_arrows/strings_with_arrows.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="interpreter.h">
+    <ClInclude Include="interpreter/interpreter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="object.h">
+    <ClInclude Include="object/object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="context.h">
+    <ClInclude Include="context/context.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

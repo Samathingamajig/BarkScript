@@ -1,9 +1,9 @@
 #include "lexer.h"
 #include <vector>
 #include <memory>
-#include "tokens.h"
-#include "position.h"
-#include "error.h"
+#include "../token/tokens.h"
+#include "../position/position.h"
+#include "../error/error.h"
 
 Lexer::Lexer(std::string input, std::string filename) {
     this->input = input;

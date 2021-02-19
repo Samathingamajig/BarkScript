@@ -3,10 +3,10 @@
 #define OBJECT_H
 #include <string>
 #include <memory>
-#include "token.h"
-#include "position.h"
-#include "context.h"
-#include "interpreter.h"
+#include "../token/token.h"
+#include "../position/position.h"
+#include "../context/context.h"
+#include "../interpreter/interpreter.h"
 
 namespace objecttypes {
     using namespace std;

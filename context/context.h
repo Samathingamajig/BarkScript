@@ -3,7 +3,7 @@
 #define CONTEXT_H
 #include <memory>
 #include <string>
-#include "position.h"
+#include "../position/position.h"
 
 struct Context;
 

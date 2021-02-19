@@ -3,7 +3,7 @@
 #define TOKEN_H
 #include <string>
 #include "tokens.h"
-#include "position.h"
+#include "../position/position.h"
 
 struct Token {
     std::string type;

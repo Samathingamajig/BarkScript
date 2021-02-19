@@ -2,9 +2,9 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 #include <memory>
-#include "ast.h"
-#include "context.h"
-#include "error.h"
+#include "../ast/ast.h"
+#include "../context/context.h"
+#include "../error/error.h"
 
 struct Object;
 typedef std::shared_ptr<Object> spObject;

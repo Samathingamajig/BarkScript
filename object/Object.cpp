@@ -1,7 +1,7 @@
 #include "object.h"
 #include <math.h>
 #include <sstream>
-#include "interpreter.h"
+#include "../interpreter/interpreter.h"
 
 bool didOverflow(double value) {
     return std::numeric_limits<double>::max() < value;

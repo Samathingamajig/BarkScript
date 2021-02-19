@@ -2,8 +2,8 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
-#include "ast.h"
-#include "object.h"
+#include "../ast/ast.h"
+#include "../object/object.h"
 
 bool RuntimeResult::hasError() { return error != nullptr; }
 
