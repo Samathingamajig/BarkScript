@@ -17,6 +17,11 @@ namespace tokens {
     const string OPEN_PAREN = "OPEN_PAREN";
     const string CLOSE_PAREN = "CLOSE_PAREN";
 
+    // Keywords and Random Identifiers
+    const string KEYWORD = "KEYWORD";
+    const string IDENTIFIER = "IDENTIFIER";
+    const string EQUAL = "EQUAL";
+
     // Data types
     const string NUMBER = "NUMBER";
 

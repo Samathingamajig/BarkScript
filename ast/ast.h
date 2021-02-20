@@ -5,11 +5,14 @@
 #include <memory>
 #include "../token/token.h"
 #include "../position/position.h"
+#include "../symboltable/symboltable.h"
 
 namespace nodetypes {
     using namespace std;
 
     const string Number = "NUMBER";
+    const string VariableAssignment = "VARASS";
+    const string VariableRetrievement = "VARRET";
     const string BinaryOperator = "BINOP";
     const string UnaryOperator = "UNOP";
     const string Error = "ERROR";
@@ -41,11 +44,39 @@ struct Node {
 
     spNode leftNode;
     spNode rightNode;
+    spNode valueNode;
 };
 
 struct NumberNode : Node {
     NumberNode(Token token) {
         this->nodeType = nodetypes::Number;
+        this->token = token;
+        this->positionStart = token.positionStart;
+        this->positionEnd = token.positionEnd;
+    }
+
+    std::string to_string() override {
+        return token.value;
+    }
+};
+
+struct VariableAssignmentNode : Node {
+    VariableAssignmentNode(Token token, spNode valueNode) {
+        this->nodeType = nodetypes::VariableAssignment;
+        this->token = token;
+        this->valueNode = valueNode;
+        this->positionStart = token.positionStart;
+        this->positionEnd = valueNode->positionEnd;
+    }
+
+    std::string to_string() override {
+        return token.value + " = " + valueNode->to_string();
+    }
+};
+
+struct VariableRetrievementNode : Node {
+    VariableRetrievementNode(Token token) {
+        this->nodeType = nodetypes::VariableRetrievement;
         this->token = token;
         this->positionStart = token.positionStart;
         this->positionEnd = token.positionEnd;

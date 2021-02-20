@@ -66,6 +66,19 @@ std::string Number::to_string() {
     return out.str();
 }
 
+spObject Number::copy() {
+    spObject other = makeSharedObject(Number());
+    other->doubleValue = this->doubleValue;
+    other->sign = this->sign;
+    other->isPureDouble = this->isPureDouble;
+    other->isPureZero = this->isPureZero;
+    other->isInfinity = this->isInfinity;
+    other->isNaN = this->isNaN;
+    other->setPosition(this->positionStart, this->positionEnd);
+    other->setContext(this->context);
+    return other;
+}
+
 RuntimeResult Number::binary_plus(spObject other) {
     RuntimeResult rt;
 

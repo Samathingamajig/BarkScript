@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include "../position/position.h"
+#include "../symboltable/symboltable.h"
 
 struct Context;
 
@@ -13,6 +14,7 @@ struct Context {
     std::string displayName = "UNKNOWN_CONTEXT_NAME";
     spContext parent;
     Position parentEntryPosition;
+    spSymbolTable symbolTable;
 
     Context(std::string displayName, spContext parent = nullptr, Position parentEntryPosition = Position()) {
         this->displayName = displayName;

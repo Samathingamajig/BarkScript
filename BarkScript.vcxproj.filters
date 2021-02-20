@@ -30,6 +30,9 @@
     <ClCompile Include="object/Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="symboltable/SymbolTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="token/tokens.h">
@@ -64,6 +67,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="context/context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="reservedwords/reservedwords.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="symboltable/symboltable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

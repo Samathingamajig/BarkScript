@@ -5,6 +5,7 @@
 #include "../token/token.h"
 #include "../token/tokens.h"
 #include "../ast/ast.h"
+#include "../reservedwords/reservedwords.h"
 
 // https://stackoverflow.com/a/20303915/12101554
 bool in_array(const std::string& value, const std::vector<std::string>& array) {
@@ -31,6 +32,9 @@ ParseResult Parser::atom() {
     if (token.type == tokens::NUMBER) {
         nextToken();
         return pr.success(makeSharedNode(NumberNode(token)));
+    } else if (token.type == tokens::IDENTIFIER) {
+        nextToken();
+        return pr.success(makeSharedNode(VariableRetrievementNode(token)));
     } else if (token.type == tokens::OPEN_PAREN) {
         nextToken();
         spNode exprRes = pr.registerPR(expr());
@@ -69,8 +73,23 @@ ParseResult Parser::term() {
 }
 
 ParseResult Parser::expr() {
-    std::function<ParseResult()> rule = [this]() { return term(); };
-    return binaryOperation(rule, { tokens::PLUS, tokens::MINUS });
+    if (currentToken.matches(tokens::KEYWORD, reservedWords::LET)) {
+        ParseResult pr;
+        nextToken();
+        if (!currentToken.matches(tokens::IDENTIFIER))
+            return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an identifier")));
+        Token variableNameToken = currentToken;
+        nextToken();
+        if (!currentToken.matches(tokens::EQUAL))
+            return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an '='")));
+        nextToken();
+        spNode exprRes = pr.registerPR(expr());
+        if (pr.hasError()) return pr;
+        return pr.success(makeSharedNode(VariableAssignmentNode(variableNameToken, exprRes)));
+    } else {
+        std::function<ParseResult()> rule = [this]() { return term(); };
+        return binaryOperation(rule, { tokens::PLUS, tokens::MINUS });
+    }
 }
 
 ParseResult Parser::parse() {

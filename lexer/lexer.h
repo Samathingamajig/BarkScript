@@ -47,6 +47,10 @@ struct Lexer {
     void readChar();
     char peekChar(int num);
     bool isNumeric(char c);
+    bool isAlpha(char c);
+    bool isUnderscore(char c);
+    bool isIdentifierStarter(char c);
+    bool isIdentifierCharacter(char c);
     SingleLexResult nextToken();
 
     MultiLexResult tokenize();

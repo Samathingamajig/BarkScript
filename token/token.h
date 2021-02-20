@@ -27,6 +27,14 @@ struct Token {
     std::string to_string() {
         return "Token(" + type + ", \"" + value + "\", " + std::to_string(positionStart.index) + ", " + std::to_string(positionEnd.index) + ")";
     }
+
+    bool matches(std::string tokenType) {
+        return this->type == tokenType;
+    }
+
+    bool matches(std::string tokenType, std::string value) {
+        return this->type == tokenType && this->value == value;
+    }
 };
 
 #endif // !TOKEN_H

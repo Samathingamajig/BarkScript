@@ -25,6 +25,8 @@ struct Interpreter {
     RuntimeResult visit(spNode node, spContext context);
 
     RuntimeResult visitNumberNode(spNode node, spContext context);
+    RuntimeResult visitVariableAssignmentNode(spNode node, spContext context);
+    RuntimeResult visitVariableRetrievementNode(spNode node, spContext context);
     RuntimeResult visitBinaryOperatorNode(spNode node, spContext context);
     RuntimeResult visitUnaryOperatorNode(spNode node, spContext context);
 };

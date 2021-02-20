@@ -33,6 +33,10 @@ RuntimeResult Interpreter::visit(spNode node, spContext context) {
 
     if (type == nodetypes::Number) {
         return visitNumberNode(node, context);
+    } else if (type == nodetypes::VariableAssignment) {
+        return visitVariableAssignmentNode(node, context);
+    } else if (type == nodetypes::VariableRetrievement) {
+        return visitVariableRetrievementNode(node, context);
     } else if (type == nodetypes::BinaryOperator) {
         return visitBinaryOperatorNode(node, context);
     } else if (type == nodetypes::UnaryOperator) {
@@ -47,6 +51,28 @@ RuntimeResult Interpreter::visitNumberNode(spNode node, spContext context) {
     number->setContext(context);
     number->setPosition(node->positionStart, node->positionEnd);
     return RuntimeResult().success(number);
+}
+
+RuntimeResult Interpreter::visitVariableAssignmentNode(spNode node, spContext context) {
+    RuntimeResult rt;
+    std::string variableName = node->token.value;
+    spObject value = rt.registerRT(visit(node->valueNode, context));
+    if (rt.hasError()) return rt;
+    bool success = context->symbolTable->set(variableName, value, true);
+    if (!success)
+        return rt.failure(makeSharedError(RuntimeError(node->token.positionStart, node->positionEnd, "Variable not reassigned properly", context)));
+    return rt.success(value);
+}
+
+RuntimeResult Interpreter::visitVariableRetrievementNode(spNode node, spContext context) {
+    RuntimeResult rt;
+    std::string variableName = node->token.value;
+    spObject value = context->symbolTable->get(variableName);
+    if (value == nullptr)
+        return rt.failure(makeSharedError(RuntimeError(node->positionStart, node->positionEnd, "Variable \"" + variableName + "\" is not defined in the current scope!", context)));
+    value = value->copy();
+    value->setPosition(node->positionStart, node->positionEnd);
+    return rt.success(value);
 }
 
 RuntimeResult Interpreter::visitBinaryOperatorNode(spNode node, spContext context) {

@@ -4,6 +4,7 @@
 #include "../token/tokens.h"
 #include "../position/position.h"
 #include "../error/error.h"
+#include "../reservedwords/reservedwords.h"
 
 Lexer::Lexer(std::string input, std::string filename) {
     this->input = input;
@@ -82,6 +83,11 @@ reset:
             token = Token(tokens::CLOSE_PAREN, ")", position, position);
             break;
         }
+        case '=':
+        {
+            token = Token(tokens::EQUAL, "=", position, position);
+            break;
+        }
         case ' ':
         {
             readChar();
@@ -107,6 +113,15 @@ reset:
                 }
                 token = Token(tokens::NUMBER, value, positionStart, position);
                 break;
+            } else if (isIdentifierStarter(current)) {
+                std::string value = std::string(1, current);
+                Position positionStart = position.copy();
+                while (isIdentifierCharacter(peekChar())) {
+                    value += peekChar();
+                    readChar();
+                }
+                token = Token(isReservedWord(value) ? tokens::KEYWORD : tokens::IDENTIFIER, value, positionStart, position);
+                break;
             } else {
                 Position positionStart = position.copy();
                 char tempCurrent = current;
@@ -120,7 +135,23 @@ reset:
 }
 
 bool Lexer::isNumeric(char c) {
-    return 48 <= c && c <= 57;
+    return '0' <= c && c <= '9';
+}
+
+bool Lexer::isAlpha(char c) {
+    return ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z');
+}
+
+bool Lexer::isUnderscore(char c) {
+    return c == '_';
+}
+
+bool Lexer::isIdentifierStarter(char c) {
+    return isAlpha(c) || isUnderscore(c);
+}
+
+bool Lexer::isIdentifierCharacter(char c) {
+    return isIdentifierStarter(c) || isNumeric(c);
 }
 
 MultiLexResult Lexer::tokenize() {

@@ -1,4 +1,5 @@
-expr        : term ((PLUS|MINUS) term)*
+expr        : KEYWORD:LET IDENTIFIER EQUAL expr
+            : term ((PLUS|MINUS) term)*
 
 term        : factor ((ASTERISK|F_SLASH|DOUBLE_F_SLASH) factor)*
 
@@ -8,4 +9,5 @@ factor      : (PLUS|MINUS) factor
 exponent    : atom (DOUBLE_ASTERISK factor)*
 
 atom        : NUMBER
+            : IDENTIFIER
             : OPEN_PAREN expr CLOSE_PAREN

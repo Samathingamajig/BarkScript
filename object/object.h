@@ -42,10 +42,11 @@ struct Object {
     Position positionEnd;
     spContext context;
 
-    void setPosition(Position positionStart, Position postionEnd);
+    void setPosition(Position positionStart, Position positionEnd);
     void setContext(spContext context);
 
     std::string virtual to_string() { return "to_string is not implemented for type " + this->type; };
+    spObject virtual copy() = 0;
 
     RuntimeResult virtual binary_plus(spObject other) { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, other->positionEnd, "binary_plus for " + this->type + " is not implemented!", this->context))); };
     RuntimeResult virtual binary_minus(spObject other) { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, other->positionEnd, "binary_minus for " + this->type + " is not implemented!", this->context))); };
@@ -59,10 +60,12 @@ struct Object {
 };
 
 struct Number : Object {
+    Number() { this->type = "Number"; };
     Number(double value, bool sign = +1);
     Number(std::string value, bool sign = +1);
 
     std::string to_string() override;
+    spObject copy() override;
 
     RuntimeResult binary_plus(spObject other) override;
     RuntimeResult binary_minus(spObject other) override;

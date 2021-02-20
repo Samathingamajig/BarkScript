@@ -8,10 +8,12 @@
 #include "interpreter/interpreter.h"
 #include "context/context.h"
 
-const std::string bsversion = "0.0.12";
+const std::string bsversion = "0.1.0";
 
 int main() {
     std::cout << "BarkScript version " << bsversion << std::endl;
+    spContext context = std::make_shared<Context>(Context("<main>"));
+    context->symbolTable = std::make_shared<SymbolTable>(SymbolTable());
     while (true) {
         //std::string input = "5+55";
         std::string input;
@@ -42,7 +44,6 @@ int main() {
                 std::cout << std::endl;
 
                 Interpreter interpreter;
-                spContext context = std::make_shared<Context>(Context("<main>"));
                 RuntimeResult rt = interpreter.visit(abSyTree.node, context);
                 if (rt.hasError()) {
                     std::cout << rt.error->to_string() << std::endl;

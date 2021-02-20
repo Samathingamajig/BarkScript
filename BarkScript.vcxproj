@@ -144,6 +144,7 @@
     <ClCompile Include="lexer/Lexer.cpp" />
     <ClCompile Include="object/Object.cpp" />
     <ClCompile Include="parser/Parser.cpp" />
+    <ClCompile Include="symboltable/SymbolTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ast/ast.h" />
@@ -154,7 +155,9 @@
     <ClInclude Include="object/object.h" />
     <ClInclude Include="parser/parser.h" />
     <ClInclude Include="position/position.h" />
+    <ClInclude Include="reservedwords/reservedwords.h" />
     <ClInclude Include="strings_with_arrows/strings_with_arrows.h" />
+    <ClInclude Include="symboltable/symboltable.h" />
     <ClInclude Include="token/token.h" />
     <ClInclude Include="token/tokens.h" />
   </ItemGroup>
