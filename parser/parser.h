@@ -10,28 +10,31 @@
 
 struct ParseResult {
     spError error = nullptr;
-    spNode node;
+    spNode node = nullptr;
+    int advancementCount = 0;
 
     bool hasError() { return error != nullptr; }
 
-    spNode registerPR(spNode node) {
-        return node;
+    void registerAdvancement() {
+        this->advancementCount++;
     }
 
     std::shared_ptr<Node> registerPR(ParseResult pr) {
+        this->advancementCount += pr.advancementCount;
         if (pr.hasError()) {
             this->error = pr.error;
         }
         return pr.node;
     }
 
-    ParseResult success(std::shared_ptr<Node> node) {
+    ParseResult success(spNode node) {
         this->node = node;
         return *this;
     }
 
     ParseResult failure(spError error) {
-        this->error = error;
+        if (this->error == nullptr || this->advancementCount == 0)
+            this->error = error;
         return *this;
     }
 };
