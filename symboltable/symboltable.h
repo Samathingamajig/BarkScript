@@ -5,6 +5,13 @@
 #include <memory>
 #include <string>
 
+enum class SymbolTableSetReturnCode {
+    perfect,
+    errorGlobalConstantVariable,
+    errorUserDefinedConstantVariable,
+    errorNotInScope,
+};
+
 struct Object;
 
 typedef std::shared_ptr<Object> spObject;
@@ -13,12 +20,16 @@ struct SymbolTable;
 
 typedef std::shared_ptr<SymbolTable> spSymbolTable;
 
+extern std::unordered_map<std::string, spObject> globalConstantVariablesTable;
+
+extern bool isGlobalConstantVariable(std::string identifier);
+
 struct SymbolTable {
     std::unordered_map<std::string, spObject> symbols;
     spSymbolTable parent = nullptr;
 
     spObject get(std::string key);
-    bool set(std::string key, spObject value, bool currentContext = false);
+    SymbolTableSetReturnCode set(std::string key, spObject value, bool currentContext = false);
 };
 
 

@@ -57,6 +57,11 @@ struct Object {
 
     RuntimeResult virtual unary_plus() { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, this->positionEnd, "unary_plus for " + this->type + " is not implemented!", this->context))); };
     RuntimeResult virtual unary_minus() { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, this->positionEnd, "unary_minus for " + this->type + " is not implemented!", this->context))); };
+
+    RuntimeResult toOther(spObject other);
+    RuntimeResult virtual toNumber() { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, this->positionEnd, "toNumber for " + this->type + " is not implemented!", this->context))); }
+    RuntimeResult virtual toBoolean() { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, this->positionEnd, "toBoolean for " + this->type + " is not implemented!", this->context))); }
+    RuntimeResult toNull();
 };
 
 struct Number : Object {
@@ -76,6 +81,40 @@ struct Number : Object {
 
     RuntimeResult unary_plus() override;
     RuntimeResult unary_minus() override;
+
+    RuntimeResult toNumber() override;
+    RuntimeResult toBoolean() override;
+};
+
+struct Boolean : Number {
+    Boolean() { this->type = "Boolean"; this->isPureZero = 0; this->isPureDouble = true; }
+    Boolean(bool value);
+
+    std::string to_string() override;
+    spObject copy() override;
+
+    RuntimeResult toNumber() override;
+    RuntimeResult toBoolean() override;
+};
+
+struct Null : Object {
+    Null() { this->type = "Null"; }
+
+    std::string to_string() override;
+    spObject copy() override;
+
+    RuntimeResult binary_plus(spObject other) override;
+    RuntimeResult binary_minus(spObject other) override;
+    RuntimeResult binary_asterisk(spObject other) override;
+    RuntimeResult binary_f_slash(spObject other) override;
+    RuntimeResult binary_double_asterisk(spObject other) override;
+    RuntimeResult binary_double_f_slash(spObject other) override;
+
+    RuntimeResult unary_plus() override;
+    RuntimeResult unary_minus() override;
+
+    RuntimeResult toNumber() override;
+    RuntimeResult toBoolean() override;
 };
 
 #endif // !OBJECT_H

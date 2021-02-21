@@ -42,7 +42,7 @@ RuntimeResult Interpreter::visit(spNode node, spContext context) {
     } else if (type == nodetypes::UnaryOperator) {
         return visitUnaryOperatorNode(node, context);
     } else {
-        std::cout << "Error: node type " + type + " does not have a visit method!" << std::endl;
+        return RuntimeResult().failure(makeSharedError(RuntimeError(node->positionStart, node->positionEnd, "Error: node type " + type + " does not have a visit method!", context)));
     }
 }
 
@@ -58,10 +58,14 @@ RuntimeResult Interpreter::visitVariableAssignmentNode(spNode node, spContext co
     std::string variableName = node->token.value;
     spObject value = rt.registerRT(visit(node->valueNode, context));
     if (rt.hasError()) return rt;
-    bool success = context->symbolTable->set(variableName, value, true);
-    if (!success)
-        return rt.failure(makeSharedError(RuntimeError(node->token.positionStart, node->positionEnd, "Variable not reassigned properly", context)));
-    return rt.success(value);
+    SymbolTableSetReturnCode success = context->symbolTable->set(variableName, value, true);
+    switch (success) {
+        case SymbolTableSetReturnCode::perfect: { return rt.success(value); }
+        case SymbolTableSetReturnCode::errorGlobalConstantVariable: { return rt.failure(makeSharedError(RuntimeError(node->token.positionStart, node->positionEnd, "You cannot modify a global constant variable!", context))); }
+        case SymbolTableSetReturnCode::errorUserDefinedConstantVariable: { return rt.failure(makeSharedError(RuntimeError(node->token.positionStart, node->positionEnd, "You cannot modify a constant variable!", context))); }
+        case SymbolTableSetReturnCode::errorNotInScope: { return rt.failure(makeSharedError(RuntimeError(node->token.positionStart, node->positionEnd, "Variable " + variableName + " does not exist in the current scope!", context))); }
+        default: { return rt.failure(makeSharedError(RuntimeError(node->token.positionStart, node->positionEnd, "Unknown return value when setting: " + std::to_string((int) success), context))); }
+    }
 }
 
 RuntimeResult Interpreter::visitVariableRetrievementNode(spNode node, spContext context) {

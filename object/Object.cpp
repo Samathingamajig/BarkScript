@@ -12,8 +12,9 @@ bool didUnderflow(double value) {
 }
 
 template <class T>
-RuntimeResult notImplemented(RuntimeResult rt, T self, spObject other, std::string function) {
-    return rt.failure(makeSharedError(RuntimeError(self->positionStart, other->positionEnd, function + " is not implemented between " + self->type + " and " + other->type + "!", self->context)));
+RuntimeResult notImplemented(RuntimeResult rt, T self, spObject other, std::string function, std::string extra = "") {
+    extra = extra.size() > 0 ? " (" + extra + ")" : "";
+    return rt.failure(makeSharedError(RuntimeError(self->positionStart, other->positionEnd, function + " is not implemented between " + self->type + " and " + other->type + "!" + extra, self->context)));
 }
 
 void Object::setPosition(Position positionStart, Position positionEnd) {
@@ -23,6 +24,24 @@ void Object::setPosition(Position positionStart, Position positionEnd) {
 
 void Object::setContext(spContext context) {
     this->context = context;
+}
+
+RuntimeResult Object::toOther(spObject other) {
+    std::string type = other->type;
+
+    if (type == "Number") {
+        return this->toNumber();
+    } else if (type == "Boolean") {
+        return this->toBoolean();
+    } else if (type == "Null") {
+        return this->toNull();
+    } else {
+        return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, this->positionEnd, "No conversion from " + this->type + " to " + other->type + " exists!", this->context)));
+    }
+}
+
+RuntimeResult Object::toNull() {
+    return RuntimeResult().success(makeSharedObject(Null()));
 }
 
 Number::Number(double value, bool sign) {
@@ -82,7 +101,14 @@ spObject Number::copy() {
 RuntimeResult Number::binary_plus(spObject other) {
     RuntimeResult rt;
 
-    if (other->type != objecttypes::Number) return notImplemented(rt, this, other, "binary_plus");
+    if (other->type != objecttypes::Number) {
+        spObject tempOther = rt.registerRT(other->toNumber());
+        if (rt.hasError()) {
+            return notImplemented(rt, this, other, "binary_plus", rt.error->details);
+        } else {
+            other = tempOther;
+        }
+    }
 
     if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
     if (this->isInfinity || other->isInfinity) {
@@ -103,7 +129,14 @@ RuntimeResult Number::binary_plus(spObject other) {
 RuntimeResult Number::binary_minus(spObject other) {
     RuntimeResult rt;
 
-    if (other->type != objecttypes::Number) return notImplemented(rt, this, other, "binary_minus");
+    if (other->type != objecttypes::Number) {
+        spObject tempOther = rt.registerRT(other->toNumber());
+        if (rt.hasError()) {
+            return notImplemented(rt, this, other, "binary_minus", rt.error->details);
+        } else {
+            other = tempOther;
+        }
+    }
 
     if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
     if (this->isInfinity || other->isInfinity) {
@@ -124,7 +157,14 @@ RuntimeResult Number::binary_minus(spObject other) {
 RuntimeResult Number::binary_asterisk(spObject other) {
     RuntimeResult rt;
 
-    if (other->type != objecttypes::Number) return notImplemented(rt, this, other, "binary_asterisk");
+    if (other->type != objecttypes::Number) {
+        spObject tempOther = rt.registerRT(other->toNumber());
+        if (rt.hasError()) {
+            return notImplemented(rt, this, other, "binary_asterisk", rt.error->details);
+        } else {
+            other = tempOther;
+        }
+    }
 
     if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
     if (this->isInfinity || other->isInfinity) {
@@ -146,7 +186,14 @@ RuntimeResult Number::binary_asterisk(spObject other) {
 RuntimeResult Number::binary_f_slash(spObject other) {
     RuntimeResult rt;
 
-    if (other->type != objecttypes::Number) return notImplemented(rt, this, other, "binary_f_slash");
+    if (other->type != objecttypes::Number) {
+        spObject tempOther = rt.registerRT(other->toNumber());
+        if (rt.hasError()) {
+            return notImplemented(rt, this, other, "binary_f_slash", rt.error->details);
+        } else {
+            other = tempOther;
+        }
+    }
 
     if (other->isPureZero) return rt.failure(makeSharedError(RuntimeError(other->positionStart, other->positionEnd, "Division by 0", this->context)));
     if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
@@ -162,7 +209,14 @@ RuntimeResult Number::binary_f_slash(spObject other) {
 RuntimeResult Number::binary_double_asterisk(spObject other) {
     RuntimeResult rt;
 
-    if (other->type != objecttypes::Number) return notImplemented(rt, this, other, "binary_double_asterisk");
+    if (other->type != objecttypes::Number) {
+        spObject tempOther = rt.registerRT(other->toNumber());
+        if (rt.hasError()) {
+            return notImplemented(rt, this, other, "binary_double_asterisk", rt.error->details);
+        } else {
+            other = tempOther;
+        }
+    }
 
     if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
     if (other->isPureZero) return rt.success(makeSharedObject(Number(1)));
@@ -179,7 +233,14 @@ RuntimeResult Number::binary_double_asterisk(spObject other) {
 RuntimeResult Number::binary_double_f_slash(spObject other) {
     RuntimeResult rt;
 
-    if (other->type != objecttypes::Number) return notImplemented(rt, this, other, "binary_double_f_slash");
+    if (other->type != objecttypes::Number) {
+        spObject tempOther = rt.registerRT(other->toNumber());
+        if (rt.hasError()) {
+            return notImplemented(rt, this, other, "binary_double_f_slash", rt.error->details);
+        } else {
+            other = tempOther;
+        }
+    }
 
     if (other->isPureZero) return rt.failure(makeSharedError(RuntimeError(other->positionStart, other->positionEnd, "Floored division by 0", this->context)));
     spObject normalDivisionResult = rt.registerRT(this->binary_f_slash(other));
@@ -205,4 +266,146 @@ RuntimeResult Number::unary_minus() {
     if (isNaN) return rt.success(makeSharedObject(Number("NaN")));
     else if (isInfinity) return rt.success(makeSharedObject(Number("Infinity", !sign)));
     return rt.success(makeSharedObject(Number(this->doubleValue * -1)));
+}
+
+RuntimeResult Number::toNumber() {
+    return RuntimeResult().success(makeSharedObject(*this));
+}
+
+RuntimeResult Number::toBoolean() {
+    return RuntimeResult().success(makeSharedObject(Boolean(!(this->isPureZero || this->isNaN))));
+}
+
+Boolean::Boolean(bool value) {
+    this->type = "Boolean";
+    this->isPureDouble = true;
+    this->isPureZero = !value;
+    this->doubleValue = value;
+}
+
+std::string Boolean::to_string() {
+    return this->isPureZero ? "false" : "true";
+}
+
+spObject Boolean::copy() {
+    return makeSharedObject(Boolean(this->doubleValue));
+}
+
+RuntimeResult Boolean::toNumber() {
+    return RuntimeResult().success(makeSharedObject(Number(this->doubleValue)));
+}
+
+RuntimeResult Boolean::toBoolean() {
+    return RuntimeResult().success(makeSharedObject(*this));
+}
+
+std::string Null::to_string() {
+    return "null";
+}
+
+spObject Null::copy() {
+    return makeSharedObject(Null());
+}
+
+RuntimeResult Null::binary_plus(spObject other) {
+    RuntimeResult rt;
+    if (other->type == "Null") {
+        spObject self = rt.registerRT(this->toNumber());
+        if (rt.hasError()) return rt;
+        spObject tempOther = rt.registerRT(this->toNumber());
+        if (rt.hasError()) return rt;
+        return self->binary_plus(tempOther);
+    }
+    spObject self = rt.registerRT(this->toOther(other));
+    if (rt.hasError()) return notImplemented(rt, this, other, "binary_plus", rt.error->details);
+    return self->binary_plus(other);
+}
+
+RuntimeResult Null::binary_minus(spObject other) {
+    RuntimeResult rt;
+    if (other->type == "Null") {
+        spObject self = rt.registerRT(this->toNumber());
+        if (rt.hasError()) return rt;
+        spObject tempOther = rt.registerRT(this->toNumber());
+        if (rt.hasError()) return rt;
+        return self->binary_minus(tempOther);
+    }
+    spObject self = rt.registerRT(this->toOther(other));
+    if (rt.hasError()) return notImplemented(rt, this, other, "binary_minus", rt.error->details);
+    return self->binary_minus(other);
+}
+
+RuntimeResult Null::binary_asterisk(spObject other) {
+    RuntimeResult rt;
+    if (other->type == "Null") {
+        spObject self = rt.registerRT(this->toNumber());
+        if (rt.hasError()) return rt;
+        spObject tempOther = rt.registerRT(this->toNumber());
+        if (rt.hasError()) return rt;
+        return self->binary_asterisk(tempOther);
+    }
+    spObject self = rt.registerRT(this->toOther(other));
+    if (rt.hasError()) return notImplemented(rt, this, other, "binary_asterisk", rt.error->details);
+    return self->binary_asterisk(other);
+}
+
+RuntimeResult Null::binary_f_slash(spObject other) {
+    RuntimeResult rt;
+    if (other->type == "Null") {
+        spObject self = rt.registerRT(this->toNumber());
+        if (rt.hasError()) return rt;
+        spObject tempOther = rt.registerRT(this->toNumber());
+        if (rt.hasError()) return rt;
+        return self->binary_f_slash(tempOther);
+    }
+    spObject self = rt.registerRT(this->toOther(other));
+    if (rt.hasError()) return notImplemented(rt, this, other, "binary_f_slash", rt.error->details);
+    return self->binary_f_slash(other);
+}
+
+RuntimeResult Null::binary_double_asterisk(spObject other) {
+    RuntimeResult rt;
+    if (other->type == "Null") {
+        spObject self = rt.registerRT(this->toNumber());
+        if (rt.hasError()) return rt;
+        spObject tempOther = rt.registerRT(this->toNumber());
+        if (rt.hasError()) return rt;
+        return self->binary_double_asterisk(tempOther);
+    }
+    spObject self = rt.registerRT(this->toOther(other));
+    if (rt.hasError()) return notImplemented(rt, this, other, "binary_double_asterisk", rt.error->details);
+    return self->binary_double_asterisk(other);
+}
+
+RuntimeResult Null::binary_double_f_slash(spObject other) {
+    RuntimeResult rt;
+    if (other->type == "Null") {
+        spObject self = rt.registerRT(this->toNumber());
+        if (rt.hasError()) return rt;
+        spObject tempOther = rt.registerRT(this->toNumber());
+        if (rt.hasError()) return rt;
+        return self->binary_double_f_slash(tempOther);
+    }
+    spObject self = rt.registerRT(this->toOther(other));
+    if (rt.hasError()) return notImplemented(rt, this, other, "binary_double_f_slash", rt.error->details);
+    return self->binary_double_f_slash(other);
+}
+
+RuntimeResult Null::unary_plus() {
+    return this->toNumber();
+}
+
+RuntimeResult Null::unary_minus() {
+    RuntimeResult rt;
+    spObject self = rt.registerRT(this->toNumber());
+    if (rt.hasError()) return rt;
+    return self->unary_minus();
+}
+
+RuntimeResult Null::toNumber() {
+    return RuntimeResult().success(makeSharedObject(Number(0)));
+}
+
+RuntimeResult Null::toBoolean() {
+    return RuntimeResult().success(makeSharedObject(Boolean(false)));
 }
