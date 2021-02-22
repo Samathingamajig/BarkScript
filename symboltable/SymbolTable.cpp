@@ -4,11 +4,11 @@
 #include "../object/object.h"
 
 std::unordered_map<std::string, spObject> globalConstantVariablesTable = {
-    { "null", makeSharedObject(Null()) },
-    { "Infinity", makeSharedObject(Number("Infinity")) },
-    { "NaN", makeSharedObject(Number("NaN")) },
-    { "true", makeSharedObject(Boolean(true)) },
-    { "false", makeSharedObject(Boolean(false)) },
+    { "null", Null() },
+    { "Infinity", Number("Infinity") },
+    { "NaN", Number("NaN") },
+    { "true", Boolean(true) },
+    { "false", Boolean(false) },
 };
 
 bool isGlobalConstantVariable(std::string identifier) {

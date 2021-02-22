@@ -42,6 +42,12 @@ struct Node {
 
     Node() {}
 
+    virtual operator spNode() = 0;
+    // All children should have the code below
+    //operator spNode() override {
+    //    return makeSharedNode(*this);
+    //}
+
     spNode leftNode;
     spNode rightNode;
     spNode valueNode;
@@ -58,6 +64,10 @@ struct NumberNode : Node {
     std::string to_string() override {
         return token.value;
     }
+
+    operator spNode() override {
+        return makeSharedNode(*this);
+    }
 };
 
 struct VariableAssignmentNode : Node {
@@ -72,6 +82,10 @@ struct VariableAssignmentNode : Node {
     std::string to_string() override {
         return token.value + " = " + valueNode->to_string();
     }
+
+    operator spNode() override {
+        return makeSharedNode(*this);
+    }
 };
 
 struct VariableRetrievementNode : Node {
@@ -84,6 +98,10 @@ struct VariableRetrievementNode : Node {
 
     std::string to_string() override {
         return token.value;
+    }
+
+    operator spNode() override {
+        return makeSharedNode(*this);
     }
 };
 
@@ -100,6 +118,10 @@ struct BinaryOperatorNode : Node {
     std::string to_string() override {
         return "(" + leftNode->to_string() + ", " + token.type + ", " + rightNode->to_string() + ")";
     }
+
+    operator spNode() override {
+        return makeSharedNode(*this);
+    }
 };
 
 struct UnaryOperatorNode : Node {
@@ -114,6 +136,10 @@ struct UnaryOperatorNode : Node {
     std::string to_string() override {
         return "(" + token.type + ", " + rightNode->to_string() + ")";
     }
+
+    operator spNode() override {
+        return makeSharedNode(*this);
+    }
 };
 
 struct ErrorNode : Node {
@@ -124,6 +150,10 @@ struct ErrorNode : Node {
 
     std::string to_string() override {
         return token.value;
+    }
+
+    operator spNode() override {
+        return makeSharedNode(*this);
     }
 };
 

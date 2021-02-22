@@ -14,7 +14,7 @@ bool didUnderflow(double value) {
 template <class T>
 RuntimeResult notImplemented(RuntimeResult rt, T self, spObject other, std::string function, std::string extra = "") {
     extra = extra.size() > 0 ? " (" + extra + ")" : "";
-    return rt.failure(makeSharedError(RuntimeError(self->positionStart, other->positionEnd, function + " is not implemented between " + self->type + " and " + other->type + "!" + extra, self->context)));
+    return rt.failure(RuntimeError(self->positionStart, other->positionEnd, function + " is not implemented between " + self->type + " and " + other->type + "!" + extra, self->context));
 }
 
 void Object::setPosition(Position positionStart, Position positionEnd) {
@@ -36,12 +36,12 @@ RuntimeResult Object::toOther(spObject other) {
     } else if (type == "Null") {
         return this->toNull();
     } else {
-        return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, this->positionEnd, "No conversion from " + this->type + " to " + other->type + " exists!", this->context)));
+        return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "No conversion from " + this->type + " to " + other->type + " exists!", this->context));
     }
 }
 
 RuntimeResult Object::toNull() {
-    return RuntimeResult().success(makeSharedObject(Null()));
+    return RuntimeResult().success(Null());
 }
 
 Number::Number(double value, bool sign) {
@@ -86,7 +86,7 @@ std::string Number::to_string() {
 }
 
 spObject Number::copy() {
-    spObject other = makeSharedObject(Number());
+    spObject other = Number();
     other->doubleValue = this->doubleValue;
     other->sign = this->sign;
     other->isPureDouble = this->isPureDouble;
@@ -110,20 +110,20 @@ RuntimeResult Number::binary_plus(spObject other) {
         }
     }
 
-    if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
+    if (this->isNaN || other->isNaN) return rt.success(Number("NaN"));
     if (this->isInfinity || other->isInfinity) {
         if (this->sign == other->sign) {
-            return rt.success(makeSharedObject(Number("Infinity", this->sign)));
+            return rt.success(Number("Infinity", this->sign));
         } else {
             // Infinity + -Infinity, and -Infinity + Infinity, are both proven impossible
             // so we need to return NaN
-            return rt.success(makeSharedObject(Number("NaN", 0)));
+            return rt.success(Number("NaN", 0));
         }
     }
     double result = this->doubleValue + other->doubleValue;
-    if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
-    if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
-    return rt.success(makeSharedObject(Number(result)));
+    if (didOverflow(result)) return rt.success(Number("Infinity", +1));
+    if (didUnderflow(result)) return rt.success(Number("Infinity", -0));
+    return rt.success(Number(result));
 }
 
 RuntimeResult Number::binary_minus(spObject other) {
@@ -138,20 +138,20 @@ RuntimeResult Number::binary_minus(spObject other) {
         }
     }
 
-    if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
+    if (this->isNaN || other->isNaN) return rt.success(Number("NaN"));
     if (this->isInfinity || other->isInfinity) {
         if (this->sign != other->sign) {
-            return rt.success(makeSharedObject(Number("Infinity", this->sign)));
+            return rt.success(Number("Infinity", this->sign));
         } else {
             // Infinity - Infinity, and -Infinity - -Infinity, are both proven impossible
             // so we need to return NaN
-            return rt.success(makeSharedObject(Number("NaN")));
+            return rt.success(Number("NaN"));
         }
     }
     double result = this->doubleValue - other->doubleValue;
-    if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
-    if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
-    return rt.success(makeSharedObject(Number(result)));
+    if (didOverflow(result)) return rt.success(Number("Infinity", +1));
+    if (didUnderflow(result)) return rt.success(Number("Infinity", -0));
+    return rt.success(Number(result));
 }
 
 RuntimeResult Number::binary_asterisk(spObject other) {
@@ -166,21 +166,21 @@ RuntimeResult Number::binary_asterisk(spObject other) {
         }
     }
 
-    if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
+    if (this->isNaN || other->isNaN) return rt.success(Number("NaN"));
     if (this->isInfinity || other->isInfinity) {
-        if (this->isPureZero || other->isPureZero) return rt.success(makeSharedObject(Number("NaN")));
+        if (this->isPureZero || other->isPureZero) return rt.success(Number("NaN"));
         // a == b is the same as !(a ^ b)
         // this->sign == other->sign
         //       0    ==         0    -> 1
         //       0    ==         1    -> 0
         //       1    ==         0    -> 0
         //       1    ==         1    -> 1
-        return rt.success(makeSharedObject(Number("Infinity", this->sign == other->sign)));
+        return rt.success(Number("Infinity", this->sign == other->sign));
     }
     double result = this->doubleValue * other->doubleValue;
-    if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
-    if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
-    return rt.success(makeSharedObject(Number(result)));
+    if (didOverflow(result)) return rt.success(Number("Infinity", +1));
+    if (didUnderflow(result)) return rt.success(Number("Infinity", -0));
+    return rt.success(Number(result));
 }
 
 RuntimeResult Number::binary_f_slash(spObject other) {
@@ -195,15 +195,15 @@ RuntimeResult Number::binary_f_slash(spObject other) {
         }
     }
 
-    if (other->isPureZero) return rt.failure(makeSharedError(RuntimeError(other->positionStart, other->positionEnd, "Division by 0", this->context)));
-    if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
-    if (this->isInfinity && other->isInfinity) return rt.success(makeSharedObject(Number("NaN")));
-    if (other->isInfinity) return rt.success(makeSharedObject(Number(0, this->sign == other->sign)));
-    if (this->isInfinity) return rt.success(makeSharedObject(Number("Infinity", this->sign == other->sign)));
+    if (other->isPureZero) return rt.failure(RuntimeError(other->positionStart, other->positionEnd, "Division by 0", this->context));
+    if (this->isNaN || other->isNaN) return rt.success(Number("NaN"));
+    if (this->isInfinity && other->isInfinity) return rt.success(Number("NaN"));
+    if (other->isInfinity) return rt.success(Number(0, this->sign == other->sign));
+    if (this->isInfinity) return rt.success(Number("Infinity", this->sign == other->sign));
     double result = this->doubleValue / other->doubleValue;
-    if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
-    if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
-    return rt.success(makeSharedObject(Number(result)));
+    if (didOverflow(result)) return rt.success(Number("Infinity", +1));
+    if (didUnderflow(result)) return rt.success(Number("Infinity", -0));
+    return rt.success(Number(result));
 }
 
 RuntimeResult Number::binary_double_asterisk(spObject other) {
@@ -218,16 +218,16 @@ RuntimeResult Number::binary_double_asterisk(spObject other) {
         }
     }
 
-    if (this->isNaN || other->isNaN) return rt.success(makeSharedObject(Number("NaN")));
-    if (other->isPureZero) return rt.success(makeSharedObject(Number(1)));
-    if (other->isInfinity && other->sign == +1) return rt.success(makeSharedObject(Number("Infinity")));
-    if (other->isInfinity && other->sign == -0) return rt.success(makeSharedObject(Number(0)));
-    if (this->isInfinity && other->sign == +1) return rt.success(makeSharedObject(Number("Infinity", this->sign)));
-    if (this->isInfinity && other->sign == -0) return rt.success(makeSharedObject(Number(0)));
+    if (this->isNaN || other->isNaN) return rt.success(Number("NaN"));
+    if (other->isPureZero) return rt.success(Number(1));
+    if (other->isInfinity && other->sign == +1) return rt.success(Number("Infinity"));
+    if (other->isInfinity && other->sign == -0) return rt.success(Number(0));
+    if (this->isInfinity && other->sign == +1) return rt.success(Number("Infinity", this->sign));
+    if (this->isInfinity && other->sign == -0) return rt.success(Number(0));
     double result = std::pow(this->doubleValue, other->doubleValue);
-    if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
-    if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
-    return rt.success(makeSharedObject(Number(result)));
+    if (didOverflow(result)) return rt.success(Number("Infinity", +1));
+    if (didUnderflow(result)) return rt.success(Number("Infinity", -0));
+    return rt.success(Number(result));
 }
 
 RuntimeResult Number::binary_double_f_slash(spObject other) {
@@ -242,38 +242,38 @@ RuntimeResult Number::binary_double_f_slash(spObject other) {
         }
     }
 
-    if (other->isPureZero) return rt.failure(makeSharedError(RuntimeError(other->positionStart, other->positionEnd, "Floored division by 0", this->context)));
+    if (other->isPureZero) return rt.failure(RuntimeError(other->positionStart, other->positionEnd, "Floored division by 0", this->context));
     spObject normalDivisionResult = rt.registerRT(this->binary_f_slash(other));
     if (rt.hasError()) return rt;
     if (!normalDivisionResult->isPureDouble) return rt;
     double result = std::floor(normalDivisionResult->doubleValue);
-    if (didOverflow(result)) return rt.success(makeSharedObject(Number("Infinity", +1)));
-    if (didUnderflow(result)) return rt.success(makeSharedObject(Number("Infinity", -0)));
-    return rt.success(makeSharedObject(Number(result)));
+    if (didOverflow(result)) return rt.success(Number("Infinity", +1));
+    if (didUnderflow(result)) return rt.success(Number("Infinity", -0));
+    return rt.success(Number(result));
 }
 
 RuntimeResult Number::unary_plus() {
     RuntimeResult rt;
 
-    if (isNaN) return rt.success(makeSharedObject(Number("NaN")));
-    else if (isInfinity) return rt.success(makeSharedObject(Number("Infinity", sign)));
-    return rt.success(makeSharedObject(Number(this->doubleValue)));
+    if (isNaN) return rt.success(Number("NaN"));
+    else if (isInfinity) return rt.success(Number("Infinity", sign));
+    return rt.success(Number(this->doubleValue));
 }
 
 RuntimeResult Number::unary_minus() {
     RuntimeResult rt;
 
-    if (isNaN) return rt.success(makeSharedObject(Number("NaN")));
-    else if (isInfinity) return rt.success(makeSharedObject(Number("Infinity", !sign)));
-    return rt.success(makeSharedObject(Number(this->doubleValue * -1)));
+    if (isNaN) return rt.success(Number("NaN"));
+    else if (isInfinity) return rt.success(Number("Infinity", !sign));
+    return rt.success(Number(this->doubleValue * -1));
 }
 
 RuntimeResult Number::toNumber() {
-    return RuntimeResult().success(makeSharedObject(*this));
+    return RuntimeResult().success(*this);
 }
 
 RuntimeResult Number::toBoolean() {
-    return RuntimeResult().success(makeSharedObject(Boolean(!(this->isPureZero || this->isNaN))));
+    return RuntimeResult().success(Boolean(!(this->isPureZero || this->isNaN)));
 }
 
 Boolean::Boolean(bool value) {
@@ -288,15 +288,15 @@ std::string Boolean::to_string() {
 }
 
 spObject Boolean::copy() {
-    return makeSharedObject(Boolean(this->doubleValue));
+    return Boolean(this->doubleValue);
 }
 
 RuntimeResult Boolean::toNumber() {
-    return RuntimeResult().success(makeSharedObject(Number(this->doubleValue)));
+    return RuntimeResult().success(Number(this->doubleValue));
 }
 
 RuntimeResult Boolean::toBoolean() {
-    return RuntimeResult().success(makeSharedObject(*this));
+    return RuntimeResult().success(*this);
 }
 
 std::string Null::to_string() {
@@ -304,7 +304,7 @@ std::string Null::to_string() {
 }
 
 spObject Null::copy() {
-    return makeSharedObject(Null());
+    return Null();
 }
 
 RuntimeResult Null::binary_plus(spObject other) {
@@ -403,9 +403,9 @@ RuntimeResult Null::unary_minus() {
 }
 
 RuntimeResult Null::toNumber() {
-    return RuntimeResult().success(makeSharedObject(Number(0)));
+    return RuntimeResult().success(Number(0));
 }
 
 RuntimeResult Null::toBoolean() {
-    return RuntimeResult().success(makeSharedObject(Boolean(false)));
+    return RuntimeResult().success(Boolean(false));
 }

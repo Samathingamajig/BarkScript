@@ -126,7 +126,7 @@ reset:
                 Position positionStart = position.copy();
                 char tempCurrent = current;
                 readChar();
-                return makeSharedError(IllegalCharError(positionStart, position, std::string(1, '\'') + tempCurrent + "'"));
+                return (spError) IllegalCharError(positionStart, position, std::string(1, '\'') + tempCurrent + "'");
             }
         }
     }

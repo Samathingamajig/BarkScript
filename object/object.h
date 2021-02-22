@@ -48,20 +48,26 @@ struct Object {
     std::string virtual to_string() { return "to_string is not implemented for type " + this->type; };
     spObject virtual copy() = 0;
 
-    RuntimeResult virtual binary_plus(spObject other) { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, other->positionEnd, "binary_plus for " + this->type + " is not implemented!", this->context))); };
-    RuntimeResult virtual binary_minus(spObject other) { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, other->positionEnd, "binary_minus for " + this->type + " is not implemented!", this->context))); };
-    RuntimeResult virtual binary_asterisk(spObject other) { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, other->positionEnd, "binary_asterisk for " + this->type + " is not implemented!", this->context))); };
-    RuntimeResult virtual binary_f_slash(spObject other) { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, other->positionEnd, "binary_f_slash for " + this->type + " is not implemented!", this->context))); };
-    RuntimeResult virtual binary_double_asterisk(spObject other) { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, other->positionEnd, "binary_double_asterisk for " + this->type + " is not implemented!", this->context))); };
-    RuntimeResult virtual binary_double_f_slash(spObject other) { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, other->positionEnd, "binary_double_f_slash for " + this->type + " is not implemented!", this->context))); };
+    RuntimeResult virtual binary_plus(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_plus for " + this->type + " is not implemented!", this->context)); };
+    RuntimeResult virtual binary_minus(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_minus for " + this->type + " is not implemented!", this->context)); };
+    RuntimeResult virtual binary_asterisk(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_asterisk for " + this->type + " is not implemented!", this->context)); };
+    RuntimeResult virtual binary_f_slash(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_f_slash for " + this->type + " is not implemented!", this->context)); };
+    RuntimeResult virtual binary_double_asterisk(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_double_asterisk for " + this->type + " is not implemented!", this->context)); };
+    RuntimeResult virtual binary_double_f_slash(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_double_f_slash for " + this->type + " is not implemented!", this->context)); };
 
-    RuntimeResult virtual unary_plus() { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, this->positionEnd, "unary_plus for " + this->type + " is not implemented!", this->context))); };
-    RuntimeResult virtual unary_minus() { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, this->positionEnd, "unary_minus for " + this->type + " is not implemented!", this->context))); };
+    RuntimeResult virtual unary_plus() { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "unary_plus for " + this->type + " is not implemented!", this->context)); };
+    RuntimeResult virtual unary_minus() { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "unary_minus for " + this->type + " is not implemented!", this->context)); };
 
     RuntimeResult toOther(spObject other);
-    RuntimeResult virtual toNumber() { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, this->positionEnd, "toNumber for " + this->type + " is not implemented!", this->context))); }
-    RuntimeResult virtual toBoolean() { return RuntimeResult().failure(makeSharedError(RuntimeError(this->positionStart, this->positionEnd, "toBoolean for " + this->type + " is not implemented!", this->context))); }
+    RuntimeResult virtual toNumber() { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "toNumber for " + this->type + " is not implemented!", this->context)); }
+    RuntimeResult virtual toBoolean() { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "toBoolean for " + this->type + " is not implemented!", this->context)); }
     RuntimeResult toNull();
+
+    virtual operator spObject() = 0;
+    // All children should have the code below
+    //operator spObject() override {
+    //    return makeSharedObject(*this);
+    //}
 };
 
 struct Number : Object {
@@ -84,6 +90,10 @@ struct Number : Object {
 
     RuntimeResult toNumber() override;
     RuntimeResult toBoolean() override;
+
+    operator spObject() override {
+        return makeSharedObject(*this);
+    }
 };
 
 struct Boolean : Number {
@@ -95,6 +105,10 @@ struct Boolean : Number {
 
     RuntimeResult toNumber() override;
     RuntimeResult toBoolean() override;
+
+    operator spObject() override {
+        return makeSharedObject(*this);
+    }
 };
 
 struct Null : Object {
@@ -115,6 +129,10 @@ struct Null : Object {
 
     RuntimeResult toNumber() override;
     RuntimeResult toBoolean() override;
+
+    operator spObject() override {
+        return makeSharedObject(*this);
+    }
 };
 
 #endif // !OBJECT_H

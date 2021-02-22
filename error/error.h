@@ -50,6 +50,12 @@ struct Error {
         output += strings_with_arrows(positionStart.filetext, positionStart, positionEnd);
         return output;
     }
+
+    virtual operator spError() = 0;
+    // All children should have the code below
+    //operator spError() override {
+    //    return makeSharedError(*this);
+    //}
 };
 
 struct IllegalCharError : Error {
@@ -60,6 +66,10 @@ struct IllegalCharError : Error {
         this->details = details;
         this->isError = true;
     }
+
+    operator spError() {
+        return makeSharedError(*this);
+    }
 };
 
 struct InvalidSyntaxError : Error {
@@ -69,6 +79,10 @@ struct InvalidSyntaxError : Error {
         this->type = errortypes::InvalidSyntaxError;
         this->details = details;
         this->isError = true;
+    }
+
+    operator spError() {
+        return makeSharedError(*this);
     }
 };
 
@@ -103,6 +117,10 @@ struct RuntimeError : Error {
         }
 
         return "Traceback (most recent call last):\n" + output;
+    }
+
+    operator spError() {
+        return makeSharedError(*this);
     }
 };
 

@@ -32,11 +32,11 @@ ParseResult Parser::atom() {
     if (token.type == tokens::NUMBER) {
         nextToken();
         pr.registerAdvancement();
-        return pr.success(makeSharedNode(NumberNode(token)));
+        return pr.success(NumberNode(token));
     } else if (token.type == tokens::IDENTIFIER) {
         nextToken();
         pr.registerAdvancement();
-        return pr.success(makeSharedNode(VariableRetrievementNode(token)));
+        return pr.success(VariableRetrievementNode(token));
     } else if (token.type == tokens::OPEN_PAREN) {
         nextToken();
         pr.registerAdvancement();
@@ -47,9 +47,9 @@ ParseResult Parser::atom() {
             pr.registerAdvancement();
             return pr.success(exprRes);
         }
-        return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a ')'")));
+        return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a ')'"));
     } else {
-        return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a number, identifier, '+', '-', or a '('")));
+        return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a number, identifier, '+', '-', or a '('"));
     }
 }
 
@@ -67,7 +67,7 @@ ParseResult Parser::factor() {
         pr.registerAdvancement();
         spNode factorRes = pr.registerPR(factor());
         if (pr.hasError()) return pr;
-        return pr.success(makeSharedNode(UnaryOperatorNode(token, factorRes)));
+        return pr.success(UnaryOperatorNode(token, factorRes));
     }
     return exponent();
 }
@@ -83,22 +83,22 @@ ParseResult Parser::expr() {
         nextToken();
         pr.registerAdvancement();
         if (!currentToken.matches(tokens::IDENTIFIER))
-            return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an identifier")));
+            return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an identifier"));
         Token variableNameToken = currentToken;
         nextToken();
         pr.registerAdvancement();
         if (!currentToken.matches(tokens::EQUAL))
-            return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an '='")));
+            return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an '='"));
         nextToken();
         pr.registerAdvancement();
         spNode exprRes = pr.registerPR(expr());
         if (pr.hasError()) return pr;
-        return pr.success(makeSharedNode(VariableAssignmentNode(variableNameToken, exprRes)));
+        return pr.success(VariableAssignmentNode(variableNameToken, exprRes));
     } else {
         std::function<ParseResult()> rule = [this]() { return term(); };
         spNode termRes = pr.registerPR(binaryOperation(rule, { tokens::PLUS, tokens::MINUS }));
         if (pr.hasError()) {
-            return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a 'let', number, identifier, '+', '-', or a '('")));
+            return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a 'let', number, identifier, '+', '-', or a '('"));
         }
         return pr.success(termRes);
     }
@@ -107,7 +107,7 @@ ParseResult Parser::expr() {
 ParseResult Parser::parse() {
     ParseResult pr = expr();
     if (!pr.hasError() && currentToken.type != tokens::EEOF) {
-        return pr.failure(makeSharedError(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a '+', '-', '*', '/', '**', '//', or a '('")));
+        return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a '+', '-', '*', '/', '**', '//', or a '('"));
     }
     return pr;
 }
@@ -127,7 +127,7 @@ ParseResult Parser::binaryOperation(std::function<ParseResult()> rule1, std::vec
         pr.registerAdvancement();
         spNode right = pr.registerPR(rule2());
         if (pr.hasError()) return pr;
-        left = makeSharedNode(BinaryOperatorNode(left, operatorToken, right));
+        left = BinaryOperatorNode(left, operatorToken, right);
     }
 
     return pr.success(left);
