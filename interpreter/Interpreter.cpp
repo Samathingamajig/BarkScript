@@ -1,7 +1,6 @@
 #include "interpreter.h"
 #include <iostream>
 #include <string>
-#include <stdexcept>
 #include "../ast/ast.h"
 #include "../object/object.h"
 
@@ -33,6 +32,8 @@ RuntimeResult Interpreter::visit(spNode node, spContext context) {
 
     if (type == nodetypes::Number) {
         return visitNumberNode(node, context);
+    } else if (type == nodetypes::VariableDeclaration) {
+        return visitVariableDeclarationNode(node, context);
     } else if (type == nodetypes::VariableAssignment) {
         return visitVariableAssignmentNode(node, context);
     } else if (type == nodetypes::VariableRetrievement) {
@@ -53,17 +54,36 @@ RuntimeResult Interpreter::visitNumberNode(spNode node, spContext context) {
     return RuntimeResult().success(number);
 }
 
-RuntimeResult Interpreter::visitVariableAssignmentNode(spNode node, spContext context) {
+RuntimeResult Interpreter::visitVariableDeclarationNode(spNode node, spContext context) {
     RuntimeResult rt;
     std::string variableName = node->token.value;
-    spObject value = rt.registerRT(visit(node->valueNode, context));
+    if (context->symbolTable->exists(variableName, false)) {
+        return rt.failure(RuntimeError(node->positionStart, node->positionEnd, "Variable " + variableName + " is already declared in the current scope!", context));
+    }
+    spObject value;
+    value = rt.registerRT(visit(node->valueNode, context));
     if (rt.hasError()) return rt;
     SymbolTableSetReturnCode success = context->symbolTable->set(variableName, value, true);
     switch (success) {
         case SymbolTableSetReturnCode::perfect: { return rt.success(value); }
         case SymbolTableSetReturnCode::errorGlobalConstantVariable: { return rt.failure(RuntimeError(node->token.positionStart, node->positionEnd, "You cannot modify a global constant variable!", context)); }
         case SymbolTableSetReturnCode::errorUserDefinedConstantVariable: { return rt.failure(RuntimeError(node->token.positionStart, node->positionEnd, "You cannot modify a constant variable!", context)); }
-        case SymbolTableSetReturnCode::errorNotInScope: { return rt.failure(RuntimeError(node->token.positionStart, node->positionEnd, "Variable " + variableName + " does not exist in the current scope!", context)); }
+        case SymbolTableSetReturnCode::errorNotInScope: { return rt.failure(RuntimeError(node->token.positionStart, node->positionEnd, "Variable \"" + variableName + "\" does not exist in the current scope!", context)); }
+        default: { return rt.failure(RuntimeError(node->token.positionStart, node->positionEnd, "Unknown return value when setting: " + std::to_string((int) success), context)); }
+    }
+}
+
+RuntimeResult Interpreter::visitVariableAssignmentNode(spNode node, spContext context) {
+    RuntimeResult rt;
+    std::string variableName = node->token.value;
+    spObject value = rt.registerRT(visit(node->valueNode, context));
+    if (rt.hasError()) return rt;
+    SymbolTableSetReturnCode success = context->symbolTable->set(variableName, value, false);
+    switch (success) {
+        case SymbolTableSetReturnCode::perfect: { return rt.success(value); }
+        case SymbolTableSetReturnCode::errorGlobalConstantVariable: { return rt.failure(RuntimeError(node->token.positionStart, node->positionEnd, "You cannot modify a global constant variable!", context)); }
+        case SymbolTableSetReturnCode::errorUserDefinedConstantVariable: { return rt.failure(RuntimeError(node->token.positionStart, node->positionEnd, "You cannot modify a constant variable!", context)); }
+        case SymbolTableSetReturnCode::errorNotInScope: { return rt.failure(RuntimeError(node->token.positionStart, node->positionEnd, "Variable \"" + variableName + "\" does not exist in the current scope!", context)); }
         default: { return rt.failure(RuntimeError(node->token.positionStart, node->positionEnd, "Unknown return value when setting: " + std::to_string((int) success), context)); }
     }
 }

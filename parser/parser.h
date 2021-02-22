@@ -47,16 +47,22 @@ struct Parser {
     int tokenIndex;
 
     Token nextToken();
+    Token peekToken(unsigned int index = 0U);
 
     ParseResult atom();
     ParseResult exponent();
     ParseResult factor();
     ParseResult term();
+    ParseResult assignment();
+    ParseResult declaration();
     ParseResult expr();
+    ParseResult statement();
     ParseResult parse();
 
     ParseResult binaryOperation(std::function<ParseResult()> rule, std::vector<std::string> allowedTokens);
     ParseResult binaryOperation(std::function<ParseResult()> rule1, std::vector<std::string> allowedTokens, std::function<ParseResult()> rule2);
+
+    bool nextIsAssignment();
 };
 
 #endif // !PARSER_H

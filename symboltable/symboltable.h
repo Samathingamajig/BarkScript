@@ -30,6 +30,8 @@ struct SymbolTable {
 
     spObject get(std::string key);
     SymbolTableSetReturnCode set(std::string key, spObject value, bool currentContext = false);
+
+    bool exists(std::string key, bool deepSearch = true);
 };
 
 

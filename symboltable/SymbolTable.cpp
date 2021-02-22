@@ -52,3 +52,13 @@ SymbolTableSetReturnCode SymbolTable::set(std::string key, spObject value, bool 
         }
     }
 }
+
+bool SymbolTable::exists(std::string key, bool deepSearch) {
+    if (symbols.find(key) != symbols.end()) {
+        return true;
+    } else if (deepSearch && parent != nullptr) {
+        return parent->exists(key, deepSearch);
+    } else {
+        return false;
+    }
+}

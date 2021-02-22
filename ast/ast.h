@@ -11,6 +11,7 @@ namespace nodetypes {
     using namespace std;
 
     const string Number = "NUMBER";
+    const string VariableDeclaration = "VARDEC";
     const string VariableAssignment = "VARASS";
     const string VariableRetrievement = "VARRET";
     const string BinaryOperator = "BINOP";
@@ -70,6 +71,24 @@ struct NumberNode : Node {
     }
 };
 
+struct VariableDeclarationNode : Node {
+    VariableDeclarationNode(Token token, spNode valueNode) {
+        this->nodeType = nodetypes::VariableDeclaration;
+        this->token = token;
+        this->valueNode = valueNode;
+        this->positionStart = token.positionStart;
+        this->positionEnd = valueNode->positionEnd;
+    }
+
+    std::string to_string() override {
+        return "(LET, identifier:\"" + token.value + "\", EQUAL, " + valueNode->to_string() + ")";
+    }
+
+    operator spNode() override {
+        return makeSharedNode(*this);
+    }
+};
+
 struct VariableAssignmentNode : Node {
     VariableAssignmentNode(Token token, spNode valueNode) {
         this->nodeType = nodetypes::VariableAssignment;
@@ -80,7 +99,7 @@ struct VariableAssignmentNode : Node {
     }
 
     std::string to_string() override {
-        return token.value + " = " + valueNode->to_string();
+        return "(identifier:\"" + token.value + "\", EQUAL, " + valueNode->to_string() + ")";
     }
 
     operator spNode() override {

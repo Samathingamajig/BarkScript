@@ -45,7 +45,7 @@ struct Error {
 
     std::string virtual to_string() {
         std::string output = type + ": " + details + '\n';
-        output += "File " + positionStart.filename + ", line " + std::to_string(positionStart.lineNumber + 1);
+        output += "File \"" + positionStart.filename + "\", line " + std::to_string(positionStart.lineNumber + 1);
         output += "\n\n";
         output += strings_with_arrows(positionStart.filetext, positionStart, positionEnd);
         return output;

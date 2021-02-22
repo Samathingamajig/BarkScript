@@ -26,6 +26,14 @@ Token Parser::nextToken() {
     return currentToken;
 }
 
+Token Parser::peekToken(unsigned int num) {
+    if (tokenIndex + num + 1 >= tokens.size()) {
+        return Token();
+    } else {
+        return tokens[tokenIndex + num + 1];
+    }
+}
+
 ParseResult Parser::atom() {
     ParseResult pr;
     Token token = currentToken;
@@ -40,12 +48,12 @@ ParseResult Parser::atom() {
     } else if (token.type == tokens::OPEN_PAREN) {
         nextToken();
         pr.registerAdvancement();
-        spNode exprRes = pr.registerPR(expr());
+        spNode value = pr.registerPR(expr());
         if (pr.hasError()) return pr;
         if (currentToken.type == tokens::CLOSE_PAREN) {
             nextToken();
             pr.registerAdvancement();
-            return pr.success(exprRes);
+            return pr.success(value);
         }
         return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a ')'"));
     } else {
@@ -77,39 +85,77 @@ ParseResult Parser::term() {
     return binaryOperation(rule, { tokens::ASTERISK, tokens::F_SLASH, tokens::DOUBLE_F_SLASH });
 }
 
+ParseResult Parser::assignment() {
+    ParseResult pr;
+    if (!currentToken.matches(tokens::IDENTIFIER))
+        return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an identifier"));
+    Token variableNameToken = currentToken;
+    nextToken();
+    pr.registerAdvancement();
+    if (!currentToken.matches(tokens::EQUAL))
+        return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an '='"));
+    nextToken();
+    pr.registerAdvancement();
+    spNode value = pr.registerPR(expr());
+    if (pr.hasError()) return pr;
+    return pr.success(VariableAssignmentNode(variableNameToken, value));
+}
+
+ParseResult Parser::declaration() {
+    ParseResult pr;
+    nextToken();
+    pr.registerAdvancement();
+    Token variableNameToken = currentToken;
+    if (variableNameToken.type != tokens::IDENTIFIER)
+        return pr.failure(InvalidSyntaxError(variableNameToken.positionStart, variableNameToken.positionEnd, "Expected an identifier"));
+    spNode value = nullptr;
+    nextToken();
+    pr.registerAdvancement();
+    if (currentToken.matches(tokens::EQUAL)) {
+        nextToken();
+        pr.registerAdvancement();
+        value = pr.registerPR(expr());
+    } else {
+        Position posEnd = variableNameToken.positionEnd.copy();
+        posEnd.columnNumber--; // The Token constructor automatically calls `advance()`
+        value = VariableRetrievementNode(Token(tokens::IDENTIFIER, "null", variableNameToken.positionStart, posEnd));
+    }
+    if (pr.hasError())
+        return pr;
+    return pr.success(VariableDeclarationNode(variableNameToken, value));
+}
+
 ParseResult Parser::expr() {
     ParseResult pr;
-    if (currentToken.matches(tokens::KEYWORD, reservedWords::LET)) {
-        nextToken();
-        pr.registerAdvancement();
-        if (!currentToken.matches(tokens::IDENTIFIER))
-            return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an identifier"));
-        Token variableNameToken = currentToken;
-        nextToken();
-        pr.registerAdvancement();
-        if (!currentToken.matches(tokens::EQUAL))
-            return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an '='"));
-        nextToken();
-        pr.registerAdvancement();
-        spNode exprRes = pr.registerPR(expr());
-        if (pr.hasError()) return pr;
-        return pr.success(VariableAssignmentNode(variableNameToken, exprRes));
+    if (nextIsAssignment()) {
+        return assignment();
     } else {
         std::function<ParseResult()> rule = [this]() { return term(); };
         spNode termRes = pr.registerPR(binaryOperation(rule, { tokens::PLUS, tokens::MINUS }));
         if (pr.hasError()) {
-            return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a 'let', number, identifier, '+', '-', or a '('"));
+            return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a number, identifier, '+', '-', or a '('"));
         }
         return pr.success(termRes);
     }
 }
 
-ParseResult Parser::parse() {
-    ParseResult pr = expr();
-    if (!pr.hasError() && currentToken.type != tokens::EEOF) {
-        return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a '+', '-', '*', '/', '**', '//', or a '('"));
+ParseResult Parser::statement() {
+    if (currentToken.matches(tokens::KEYWORD, reservedWords::LET)) {
+        return declaration();
+    } else {
+        ParseResult pr = expr();
+        if (pr.hasError()) {
+            return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a 'let', number, identifier, '+', '-', or a '('"));
+        }
+        if (!pr.hasError() && currentToken.type != tokens::EEOF) {
+            return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a '+', '-', '*', '/', '**', '//', or a '('"));
+        }
+        return pr;
     }
-    return pr;
+}
+
+ParseResult Parser::parse() {
+    return statement();
 }
 
 ParseResult Parser::binaryOperation(std::function<ParseResult()> rule, std::vector<std::string> allowedTokens) {
@@ -131,4 +177,8 @@ ParseResult Parser::binaryOperation(std::function<ParseResult()> rule1, std::vec
     }
 
     return pr.success(left);
+}
+
+bool Parser::nextIsAssignment() {
+    return peekToken(0).matches(tokens::EQUAL);
 }
