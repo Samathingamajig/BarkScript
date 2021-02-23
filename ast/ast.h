@@ -37,7 +37,7 @@ struct Node {
     Position positionStart;
     Position positionEnd;
 
-    std::string virtual to_string() {
+    std::string virtual to_string() const {
         return "Not implemented! " + nodeType;
     };
 
@@ -55,14 +55,14 @@ struct Node {
 };
 
 struct NumberNode : Node {
-    NumberNode(Token token) {
+    NumberNode(const Token& token) {
         this->nodeType = nodetypes::Number;
         this->token = token;
         this->positionStart = token.positionStart;
         this->positionEnd = token.positionEnd;
     }
 
-    std::string to_string() override {
+    std::string to_string() const override {
         return token.value;
     }
 
@@ -72,7 +72,7 @@ struct NumberNode : Node {
 };
 
 struct VariableDeclarationNode : Node {
-    VariableDeclarationNode(Token token, spNode valueNode) {
+    VariableDeclarationNode(const Token& token, const spNode& valueNode) {
         this->nodeType = nodetypes::VariableDeclaration;
         this->token = token;
         this->valueNode = valueNode;
@@ -80,7 +80,7 @@ struct VariableDeclarationNode : Node {
         this->positionEnd = valueNode->positionEnd;
     }
 
-    std::string to_string() override {
+    std::string to_string() const override {
         return "(LET, identifier:\"" + token.value + "\", EQUAL, " + valueNode->to_string() + ")";
     }
 
@@ -90,7 +90,7 @@ struct VariableDeclarationNode : Node {
 };
 
 struct VariableAssignmentNode : Node {
-    VariableAssignmentNode(Token token, spNode valueNode) {
+    VariableAssignmentNode(const Token& token, const spNode& valueNode) {
         this->nodeType = nodetypes::VariableAssignment;
         this->token = token;
         this->valueNode = valueNode;
@@ -98,7 +98,7 @@ struct VariableAssignmentNode : Node {
         this->positionEnd = valueNode->positionEnd;
     }
 
-    std::string to_string() override {
+    std::string to_string() const override {
         return "(identifier:\"" + token.value + "\", EQUAL, " + valueNode->to_string() + ")";
     }
 
@@ -108,14 +108,14 @@ struct VariableAssignmentNode : Node {
 };
 
 struct VariableRetrievementNode : Node {
-    VariableRetrievementNode(Token token) {
+    VariableRetrievementNode(const Token& token) {
         this->nodeType = nodetypes::VariableRetrievement;
         this->token = token;
         this->positionStart = token.positionStart;
         this->positionEnd = token.positionEnd;
     }
 
-    std::string to_string() override {
+    std::string to_string() const override {
         return token.value;
     }
 
@@ -125,7 +125,7 @@ struct VariableRetrievementNode : Node {
 };
 
 struct BinaryOperatorNode : Node {
-    BinaryOperatorNode(spNode leftNode, Token token, spNode rightNode) {
+    BinaryOperatorNode(const spNode& leftNode, const Token& token, const spNode& rightNode) {
         this->nodeType = nodetypes::BinaryOperator;
         this->token = token;
         this->leftNode = leftNode;
@@ -134,7 +134,7 @@ struct BinaryOperatorNode : Node {
         this->positionEnd = rightNode->positionEnd;
     }
 
-    std::string to_string() override {
+    std::string to_string() const override {
         return "(" + leftNode->to_string() + ", " + token.type + ", " + rightNode->to_string() + ")";
     }
 
@@ -144,7 +144,7 @@ struct BinaryOperatorNode : Node {
 };
 
 struct UnaryOperatorNode : Node {
-    UnaryOperatorNode(Token token, spNode rightNode) {
+    UnaryOperatorNode(const Token& token, const spNode& rightNode) {
         this->nodeType = nodetypes::UnaryOperator;
         this->token = token;
         this->rightNode = rightNode;
@@ -152,7 +152,7 @@ struct UnaryOperatorNode : Node {
         this->positionEnd = rightNode->positionEnd;
     }
 
-    std::string to_string() override {
+    std::string to_string() const override {
         return "(" + token.type + ", " + rightNode->to_string() + ")";
     }
 
@@ -162,12 +162,12 @@ struct UnaryOperatorNode : Node {
 };
 
 struct ErrorNode : Node {
-    ErrorNode(Token token) {
+    ErrorNode(const Token& token) {
         this->nodeType = nodetypes::Error;
         this->token = token;
     }
 
-    std::string to_string() override {
+    std::string to_string() const override {
         return token.value;
     }
 

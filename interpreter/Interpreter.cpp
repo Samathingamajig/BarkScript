@@ -4,30 +4,30 @@
 #include "../ast/ast.h"
 #include "../object/object.h"
 
-bool RuntimeResult::hasError() { return error != nullptr; }
+bool RuntimeResult::hasError() const { return error != nullptr; }
 
-spObject RuntimeResult::registerRT(spObject object) {
+spObject RuntimeResult::registerRT(const spObject& object) {
     return object;
 }
 
-spObject RuntimeResult::registerRT(RuntimeResult rt) {
+spObject RuntimeResult::registerRT(const RuntimeResult& rt) {
     if (rt.hasError()) {
         this->error = rt.error;
     }
     return rt.object;
 }
 
-RuntimeResult RuntimeResult::success(spObject object) {
+RuntimeResult RuntimeResult::success(const spObject& object) {
     this->object = object;
     return *this;
 }
 
-RuntimeResult RuntimeResult::failure(spError error) {
+RuntimeResult RuntimeResult::failure(const spError& error) {
     this->error = error;
     return *this;
 }
 
-RuntimeResult Interpreter::visit(spNode node, spContext context) {
+RuntimeResult Interpreter::visit(const spNode& node, const spContext& context) {
     std::string type = node->nodeType;
 
     if (type == nodetypes::Number) {
@@ -47,14 +47,14 @@ RuntimeResult Interpreter::visit(spNode node, spContext context) {
     }
 }
 
-RuntimeResult Interpreter::visitNumberNode(spNode node, spContext context) {
+RuntimeResult Interpreter::visitNumberNode(const spNode& node, const spContext& context) {
     spObject number = Number(node->token.value);
     number->setContext(context);
     number->setPosition(node->positionStart, node->positionEnd);
     return RuntimeResult().success(number);
 }
 
-RuntimeResult Interpreter::visitVariableDeclarationNode(spNode node, spContext context) {
+RuntimeResult Interpreter::visitVariableDeclarationNode(const spNode& node, const spContext& context) {
     RuntimeResult rt;
     std::string variableName = node->token.value;
     if (context->symbolTable->exists(variableName, false)) {
@@ -73,7 +73,7 @@ RuntimeResult Interpreter::visitVariableDeclarationNode(spNode node, spContext c
     }
 }
 
-RuntimeResult Interpreter::visitVariableAssignmentNode(spNode node, spContext context) {
+RuntimeResult Interpreter::visitVariableAssignmentNode(const spNode& node, const spContext& context) {
     RuntimeResult rt;
     std::string variableName = node->token.value;
     spObject value = rt.registerRT(visit(node->valueNode, context));
@@ -88,7 +88,7 @@ RuntimeResult Interpreter::visitVariableAssignmentNode(spNode node, spContext co
     }
 }
 
-RuntimeResult Interpreter::visitVariableRetrievementNode(spNode node, spContext context) {
+RuntimeResult Interpreter::visitVariableRetrievementNode(const spNode& node, const spContext& context) {
     RuntimeResult rt;
     std::string variableName = node->token.value;
     spObject value = context->symbolTable->get(variableName);
@@ -99,7 +99,7 @@ RuntimeResult Interpreter::visitVariableRetrievementNode(spNode node, spContext 
     return rt.success(value);
 }
 
-RuntimeResult Interpreter::visitBinaryOperatorNode(spNode node, spContext context) {
+RuntimeResult Interpreter::visitBinaryOperatorNode(const spNode& node, const spContext& context) {
     RuntimeResult rt;
     spObject left = rt.registerRT(visit(node->leftNode, context));
     if (rt.hasError()) return rt;
@@ -129,7 +129,7 @@ RuntimeResult Interpreter::visitBinaryOperatorNode(spNode node, spContext contex
     return rt.success(result.object);
 }
 
-RuntimeResult Interpreter::visitUnaryOperatorNode(spNode node, spContext context) {
+RuntimeResult Interpreter::visitUnaryOperatorNode(const spNode& node, const spContext& context) {
     RuntimeResult rt;
     spObject object = rt.registerRT(visit(node->rightNode, context));
     if (rt.hasError()) return rt;

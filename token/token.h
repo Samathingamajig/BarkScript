@@ -16,12 +16,13 @@ struct Token {
         value = "NULL";
     }
 
-    Token(std::string type, std::string value, Position positionStart, Position positionEnd) {
+    Token(const std::string& type, const std::string& value, const Position positionStart, const Position positionEnd, const bool& advanceEnd = true) {
         this->type = type;
         this->value = value;
-        this->positionStart = positionStart.copy();
-        this->positionEnd = positionEnd.copy();
-        this->positionEnd.advance();
+        this->positionStart = positionStart;
+        this->positionEnd = positionEnd;
+        if (advanceEnd)
+            this->positionEnd.advance();
     }
 
     std::string to_string() {

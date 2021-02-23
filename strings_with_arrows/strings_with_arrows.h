@@ -6,7 +6,7 @@
 #include "../position/position.h"
 
 // Translation from python: https://github.com/davidcallanan/py-myopl-code/blob/master/ep2/strings_with_arrows.py
-inline std::string strings_with_arrows(std::string text, Position positionStart, Position positionEnd) {
+inline std::string strings_with_arrows(const std::string& text, const Position& positionStart, const Position& positionEnd) {
     std::string result = "";
 
     // Calculate indices

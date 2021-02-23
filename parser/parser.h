@@ -13,13 +13,13 @@ struct ParseResult {
     spNode node = nullptr;
     int advancementCount = 0;
 
-    bool hasError() { return error != nullptr; }
+    bool hasError() const { return error != nullptr; }
 
     void registerAdvancement() {
         this->advancementCount++;
     }
 
-    std::shared_ptr<Node> registerPR(ParseResult pr) {
+    std::shared_ptr<Node> registerPR(const ParseResult& pr) {
         this->advancementCount += pr.advancementCount;
         if (pr.hasError()) {
             this->error = pr.error;
@@ -27,12 +27,12 @@ struct ParseResult {
         return pr.node;
     }
 
-    ParseResult success(spNode node) {
+    ParseResult success(const spNode& node) {
         this->node = node;
         return *this;
     }
 
-    ParseResult failure(spError error) {
+    ParseResult failure(const spError& error) {
         if (this->error == nullptr || this->advancementCount == 0)
             this->error = error;
         return *this;
@@ -40,14 +40,14 @@ struct ParseResult {
 };
 
 struct Parser {
-    Parser(std::vector<Token> tokens);
+    Parser(const std::vector<Token>& tokens);
 
     std::vector<Token> tokens;
     Token currentToken;
     int tokenIndex;
 
     Token nextToken();
-    Token peekToken(unsigned int index = 0U);
+    Token peekToken(unsigned int index = 0U) const;
 
     ParseResult atom();
     ParseResult exponent();
@@ -59,10 +59,10 @@ struct Parser {
     ParseResult statement();
     ParseResult parse();
 
-    ParseResult binaryOperation(std::function<ParseResult()> rule, std::vector<std::string> allowedTokens);
-    ParseResult binaryOperation(std::function<ParseResult()> rule1, std::vector<std::string> allowedTokens, std::function<ParseResult()> rule2);
+    ParseResult binaryOperation(const std::function<ParseResult()>& rule, const std::vector<std::string>& allowedTokens);
+    ParseResult binaryOperation(const std::function<ParseResult()>& rule1, const std::vector<std::string>& allowedTokens, const std::function<ParseResult()>& rule2);
 
-    bool nextIsAssignment();
+    bool nextIsAssignment() const;
 };
 
 #endif // !PARSER_H

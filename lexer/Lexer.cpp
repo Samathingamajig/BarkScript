@@ -6,7 +6,7 @@
 #include "../error/error.h"
 #include "../reservedwords/reservedwords.h"
 
-Lexer::Lexer(std::string input, std::string filename) {
+Lexer::Lexer(const std::string& input, const std::string&& filename) {
     this->input = input;
     this->inputLength = input.length();
     if (inputLength > 0) {
@@ -29,7 +29,7 @@ void Lexer::readChar() {
     position.advance();
 }
 
-char Lexer::peekChar(int num = 0) {
+char Lexer::peekChar(const int& num) const {
     if (position.index + num + 1 >= inputLength) {
         return 0;
     } else {
@@ -54,7 +54,7 @@ reset:
         case '*':
         {
             if (peekChar() == '*') {
-                Position start = position.copy();
+                Position start = position;
                 readChar();
                 token = Token(tokens::DOUBLE_ASTERISK, "**", start, position);
                 break;
@@ -65,7 +65,7 @@ reset:
         case '/':
         {
             if (peekChar() == '/') {
-                Position start = position.copy();
+                Position start = position;
                 readChar();
                 token = Token(tokens::DOUBLE_F_SLASH, "//", start, position);
                 break;
@@ -102,7 +102,7 @@ reset:
         {
             if (isNumeric(current)) {
                 std::string value = std::string(1, current);
-                Position positionStart = position.copy();
+                Position positionStart = position;
                 bool period = false;
                 while (isNumeric(peekChar()) || (peekChar() == '.' && !period)) {
                     value += peekChar();
@@ -115,7 +115,7 @@ reset:
                 break;
             } else if (isIdentifierStarter(current)) {
                 std::string value = std::string(1, current);
-                Position positionStart = position.copy();
+                Position positionStart = position;
                 while (isIdentifierCharacter(peekChar())) {
                     value += peekChar();
                     readChar();
@@ -123,7 +123,7 @@ reset:
                 token = Token(isReservedWord(value) ? tokens::KEYWORD : tokens::IDENTIFIER, value, positionStart, position);
                 break;
             } else {
-                Position positionStart = position.copy();
+                Position positionStart = position;
                 char tempCurrent = current;
                 readChar();
                 return (spError) IllegalCharError(positionStart, position, std::string(1, '\'') + tempCurrent + "'");
@@ -134,23 +134,23 @@ reset:
     return token;
 }
 
-bool Lexer::isNumeric(char c) {
+bool Lexer::isNumeric(const char& c) const {
     return '0' <= c && c <= '9';
 }
 
-bool Lexer::isAlpha(char c) {
+bool Lexer::isAlpha(const char& c) const {
     return ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z');
 }
 
-bool Lexer::isUnderscore(char c) {
+bool Lexer::isUnderscore(const char& c) const {
     return c == '_';
 }
 
-bool Lexer::isIdentifierStarter(char c) {
+bool Lexer::isIdentifierStarter(const char& c) const {
     return isAlpha(c) || isUnderscore(c);
 }
 
-bool Lexer::isIdentifierCharacter(char c) {
+bool Lexer::isIdentifierCharacter(const char& c) const {
     return isIdentifierStarter(c) || isNumeric(c);
 }
 

@@ -16,7 +16,7 @@ struct Context {
     Position parentEntryPosition;
     spSymbolTable symbolTable;
 
-    Context(std::string displayName, spContext parent = nullptr, Position parentEntryPosition = Position()) {
+    Context(const std::string& displayName, const spContext& parent = nullptr, const Position& parentEntryPosition = Position()) {
         this->displayName = displayName;
         this->parent = parent;
         this->parentEntryPosition = parentEntryPosition;

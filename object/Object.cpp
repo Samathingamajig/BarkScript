@@ -3,30 +3,29 @@
 #include <sstream>
 #include "../interpreter/interpreter.h"
 
-bool didOverflow(double value) {
+bool didOverflow(const double& value) {
     return std::numeric_limits<double>::max() < value;
 }
 
-bool didUnderflow(double value) {
+bool didUnderflow(const double& value) {
     return -std::numeric_limits<double>::max() > value;
 }
 
 template <class T>
-RuntimeResult notImplemented(RuntimeResult rt, T self, spObject other, std::string function, std::string extra = "") {
-    extra = extra.size() > 0 ? " (" + extra + ")" : "";
-    return rt.failure(RuntimeError(self->positionStart, other->positionEnd, function + " is not implemented between " + self->type + " and " + other->type + "!" + extra, self->context));
+RuntimeResult notImplemented(RuntimeResult& rt, const T& self, spObject other, const std::string&& function, const std::string& extra = "") {
+    return rt.failure(RuntimeError(self->positionStart, other->positionEnd, function + " is not implemented between " + self->type + " and " + other->type + "!" + (extra.size() > 0 ? " (" + extra + ")" : ""), self->context));
 }
 
-void Object::setPosition(Position positionStart, Position positionEnd) {
+void Object::setPosition(const Position& positionStart, const Position& positionEnd) {
     this->positionStart = positionStart;
     this->positionEnd = positionEnd;
 }
 
-void Object::setContext(spContext context) {
+void Object::setContext(const spContext& context) {
     this->context = context;
 }
 
-RuntimeResult Object::toOther(spObject other) {
+RuntimeResult Object::toOther(spObject other) const {
     std::string type = other->type;
 
     if (type == "Number") {
@@ -40,11 +39,11 @@ RuntimeResult Object::toOther(spObject other) {
     }
 }
 
-RuntimeResult Object::toNull() {
+RuntimeResult Object::toNull() const {
     return RuntimeResult().success(Null());
 }
 
-Number::Number(double value, bool sign) {
+Number::Number(const double& value, const bool sign) {
     this->type = "Number";
     this->doubleValue = value;
     this->isPureDouble = true;
@@ -52,7 +51,7 @@ Number::Number(double value, bool sign) {
     if (value == 0) this->isPureZero = true;
 }
 
-Number::Number(std::string value, bool sign) {
+Number::Number(const std::string& value, const bool sign) {
     this->type = "Number";
     this->sign = sign;
     if (value == "Infinity") {
@@ -70,7 +69,7 @@ Number::Number(std::string value, bool sign) {
     }
 }
 
-std::string Number::to_string() {
+std::string Number::to_string() const {
     // https://stackoverflow.com/a/16606128/12101554
     if (isInfinity) {
         std::string sign;
@@ -85,7 +84,7 @@ std::string Number::to_string() {
     return out.str();
 }
 
-spObject Number::copy() {
+spObject Number::copy() const {
     spObject other = Number();
     other->doubleValue = this->doubleValue;
     other->sign = this->sign;
@@ -268,11 +267,11 @@ RuntimeResult Number::unary_minus() {
     return rt.success(Number(this->doubleValue * -1));
 }
 
-RuntimeResult Number::toNumber() {
-    return RuntimeResult().success(*this);
+RuntimeResult Number::toNumber() const {
+    return RuntimeResult().success(Number(*this));
 }
 
-RuntimeResult Number::toBoolean() {
+RuntimeResult Number::toBoolean() const {
     return RuntimeResult().success(Boolean(!(this->isPureZero || this->isNaN)));
 }
 
@@ -283,27 +282,27 @@ Boolean::Boolean(bool value) {
     this->doubleValue = value;
 }
 
-std::string Boolean::to_string() {
+std::string Boolean::to_string() const {
     return this->isPureZero ? "false" : "true";
 }
 
-spObject Boolean::copy() {
+spObject Boolean::copy() const {
     return Boolean(this->doubleValue);
 }
 
-RuntimeResult Boolean::toNumber() {
+RuntimeResult Boolean::toNumber() const {
     return RuntimeResult().success(Number(this->doubleValue));
 }
 
-RuntimeResult Boolean::toBoolean() {
-    return RuntimeResult().success(*this);
+RuntimeResult Boolean::toBoolean() const {
+    return RuntimeResult().success(Boolean(this->doubleValue != 0.0));
 }
 
-std::string Null::to_string() {
+std::string Null::to_string() const {
     return "null";
 }
 
-spObject Null::copy() {
+spObject Null::copy() const {
     return Null();
 }
 
@@ -402,10 +401,10 @@ RuntimeResult Null::unary_minus() {
     return self->unary_minus();
 }
 
-RuntimeResult Null::toNumber() {
+RuntimeResult Null::toNumber() const {
     return RuntimeResult().success(Number(0));
 }
 
-RuntimeResult Null::toBoolean() {
+RuntimeResult Null::toBoolean() const {
     return RuntimeResult().success(Boolean(false));
 }

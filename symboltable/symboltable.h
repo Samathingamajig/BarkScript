@@ -22,16 +22,16 @@ typedef std::shared_ptr<SymbolTable> spSymbolTable;
 
 extern std::unordered_map<std::string, spObject> globalConstantVariablesTable;
 
-extern bool isGlobalConstantVariable(std::string identifier);
+extern bool isGlobalConstantVariable(const std::string& identifier);
 
 struct SymbolTable {
     std::unordered_map<std::string, spObject> symbols;
     spSymbolTable parent = nullptr;
 
-    spObject get(std::string key);
-    SymbolTableSetReturnCode set(std::string key, spObject value, bool currentContext = false);
+    spObject get(const std::string& key) const;
+    SymbolTableSetReturnCode set(const std::string& key, const spObject& value, const bool forceCurrentContext = false);
 
-    bool exists(std::string key, bool deepSearch = true);
+    bool exists(const std::string& key, const bool deepSearch = true) const;
 };
 
 

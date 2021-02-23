@@ -35,7 +35,7 @@ struct Error {
 
     Error() {}
 
-    Error(Position positionStart, Position positionEnd, std::string type, std::string details) {
+    Error(const Position& positionStart, const Position& positionEnd, const std::string& type, const std::string& details) {
         this->positionStart = positionStart;
         this->positionEnd = positionEnd;
         this->type = type;
@@ -43,7 +43,7 @@ struct Error {
         this->isError = true;
     }
 
-    std::string virtual to_string() {
+    std::string virtual to_string() const {
         std::string output = type + ": " + details + '\n';
         output += "File \"" + positionStart.filename + "\", line " + std::to_string(positionStart.lineNumber + 1);
         output += "\n\n";
@@ -59,7 +59,7 @@ struct Error {
 };
 
 struct IllegalCharError : Error {
-    IllegalCharError(Position positionStart, Position positionEnd, std::string details) {
+    IllegalCharError(const Position& positionStart, const Position& positionEnd, const std::string&& details) {
         this->positionStart = positionStart;
         this->positionEnd = positionEnd;
         this->type = errortypes::IllegalCharError;
@@ -67,13 +67,13 @@ struct IllegalCharError : Error {
         this->isError = true;
     }
 
-    operator spError() {
+    operator spError() override {
         return makeSharedError(*this);
     }
 };
 
 struct InvalidSyntaxError : Error {
-    InvalidSyntaxError(Position positionStart, Position positionEnd, std::string details) {
+    InvalidSyntaxError(const Position& positionStart, const Position& positionEnd, const std::string&& details) {
         this->positionStart = positionStart;
         this->positionEnd = positionEnd;
         this->type = errortypes::InvalidSyntaxError;
@@ -81,7 +81,7 @@ struct InvalidSyntaxError : Error {
         this->isError = true;
     }
 
-    operator spError() {
+    operator spError() override {
         return makeSharedError(*this);
     }
 };
@@ -89,7 +89,7 @@ struct InvalidSyntaxError : Error {
 struct RuntimeError : Error {
     spContext context;
 
-    RuntimeError(Position positionStart, Position positionEnd, std::string details, spContext context) {
+    RuntimeError(const Position& positionStart, const Position& positionEnd, const std::string&& details, const spContext& context) {
         this->positionStart = positionStart;
         this->positionEnd = positionEnd;
         this->type = errortypes::RuntimeError;
@@ -97,7 +97,7 @@ struct RuntimeError : Error {
         this->context = context;
     }
 
-    std::string to_string() override {
+    std::string to_string() const override {
         std::string output = generateTraceback();
         output += type + ": " + details;
         output += "\n\n";
@@ -105,21 +105,21 @@ struct RuntimeError : Error {
         return output;
     }
 
-    std::string generateTraceback() {
+    std::string generateTraceback() const {
         std::string output = "";
-        Position pos = positionStart;
+        const Position* pos = &positionStart;
         spContext ctx = context;
 
         while (ctx != nullptr) {
-            output = "  File \"" + pos.filename + "\", line " + std::to_string(pos.lineNumber) + ", in \"" + ctx->displayName + "\"\n" + output;
-            pos = ctx->parentEntryPosition;
+            output = "  File \"" + pos->filename + "\", line " + std::to_string(pos->lineNumber) + ", in \"" + ctx->displayName + "\"\n" + output;
+            pos = &ctx->parentEntryPosition;
             ctx = ctx->parent;
         }
 
         return "Traceback (most recent call last):\n" + output;
     }
 
-    operator spError() {
+    operator spError() override {
         return makeSharedError(*this);
     }
 };

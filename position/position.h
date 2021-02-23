@@ -18,7 +18,7 @@ struct Position {
         filetext = "UNKNOWN_FILE_TEXT";
     }
 
-    Position(int index, int lineNumber, int columnNumber, std::string filename, std::string filetext) {
+    Position(const int& index, const int& lineNumber, const int& columnNumber, const std::string& filename, const std::string& filetext) {
         this->index = index;
         this->lineNumber = lineNumber;
         this->columnNumber = columnNumber;
@@ -26,7 +26,7 @@ struct Position {
         this->filetext = filetext;
     }
 
-    Position advance(char currentChar = ' ') {
+    Position advance(const char& currentChar = ' ') {
         index++;
         columnNumber++;
 
@@ -37,11 +37,6 @@ struct Position {
 
         return *this;
     }
-
-    Position copy() {
-        return Position(index, lineNumber, columnNumber, filename, filetext);
-    }
 };
 
 #endif // !POSITION_H
-
