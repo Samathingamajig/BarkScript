@@ -14,7 +14,7 @@ const std::string reservedWordsArray[] = {
     reservedWords::LET,
 };
 
-inline bool isReservedWord(std::string identifier) {
+inline bool isReservedWord(const std::string& identifier) {
     return std::find(std::begin(reservedWordsArray), std::end(reservedWordsArray), identifier) != std::end(reservedWordsArray);
 }
 

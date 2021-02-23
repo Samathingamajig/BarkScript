@@ -10,11 +10,11 @@ struct SingleLexResult {
     Token token;
     spError error = nullptr;
 
-    SingleLexResult(Token token) {
+    SingleLexResult(const Token& token) {
         this->token = token;
     }
 
-    SingleLexResult(spError error) {
+    SingleLexResult(const spError& error) {
         this->error = error;
     }
 };
@@ -23,13 +23,13 @@ struct MultiLexResult {
     std::vector<Token> tokenized;
     spError error = nullptr;
 
-    bool hasError() { return error != nullptr; }
+    bool hasError() const { return error != nullptr; }
 
-    MultiLexResult(std::vector<Token> tokenized) {
+    MultiLexResult(const std::vector<Token>& tokenized) {
         this->tokenized = tokenized;
     }
 
-    MultiLexResult(spError error) {
+    MultiLexResult(const spError& error) {
         this->error = error;
     }
 };
@@ -42,15 +42,15 @@ struct Lexer {
     int inputLength;
     bool finished = false;
 
-    Lexer(std::string input, std::string filename = "<stdin>");
+    Lexer(const std::string& input, const std::string&& filename = "<stdin>");
 
     void readChar();
-    char peekChar(int num);
-    bool isNumeric(char c);
-    bool isAlpha(char c);
-    bool isUnderscore(char c);
-    bool isIdentifierStarter(char c);
-    bool isIdentifierCharacter(char c);
+    char peekChar(const int& num = 0) const;
+    bool isNumeric(const char& c) const;
+    bool isAlpha(const char& c) const;
+    bool isUnderscore(const char& c) const;
+    bool isIdentifierStarter(const char& c) const;
+    bool isIdentifierCharacter(const char& c) const;
     SingleLexResult nextToken();
 
     MultiLexResult tokenize();

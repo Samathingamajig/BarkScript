@@ -12,7 +12,7 @@ bool in_array(const std::string& value, const std::vector<std::string>& array) {
     return std::find(array.begin(), array.end(), value) != array.end();
 }
 
-Parser::Parser(std::vector<Token> tokens) {
+Parser::Parser(const std::vector<Token>& tokens) {
     this->tokens = tokens;
     this->tokenIndex = -1;
     nextToken();
@@ -26,7 +26,7 @@ Token Parser::nextToken() {
     return currentToken;
 }
 
-Token Parser::peekToken(unsigned int num) {
+Token Parser::peekToken(unsigned int num) const {
     if (tokenIndex + num + 1 >= tokens.size()) {
         return Token();
     } else {
@@ -116,9 +116,7 @@ ParseResult Parser::declaration() {
         pr.registerAdvancement();
         value = pr.registerPR(expr());
     } else {
-        Position posEnd = variableNameToken.positionEnd.copy();
-        posEnd.columnNumber--; // The Token constructor automatically calls `advance()`
-        value = VariableRetrievementNode(Token(tokens::IDENTIFIER, "null", variableNameToken.positionStart, posEnd));
+        value = VariableRetrievementNode(Token(tokens::IDENTIFIER, "null", variableNameToken.positionStart, variableNameToken.positionEnd, false));
     }
     if (pr.hasError())
         return pr;
@@ -158,11 +156,11 @@ ParseResult Parser::parse() {
     return statement();
 }
 
-ParseResult Parser::binaryOperation(std::function<ParseResult()> rule, std::vector<std::string> allowedTokens) {
+ParseResult Parser::binaryOperation(const std::function<ParseResult()>& rule, const std::vector<std::string>& allowedTokens) {
     return binaryOperation(rule, allowedTokens, rule);
 }
 
-ParseResult Parser::binaryOperation(std::function<ParseResult()> rule1, std::vector<std::string> allowedTokens, std::function<ParseResult()> rule2) {
+ParseResult Parser::binaryOperation(const std::function<ParseResult()>& rule1, const std::vector<std::string>& allowedTokens, const std::function<ParseResult()>& rule2) {
     ParseResult pr;
     spNode left = pr.registerPR(rule1());
     if (pr.hasError()) return pr;
@@ -179,6 +177,6 @@ ParseResult Parser::binaryOperation(std::function<ParseResult()> rule1, std::vec
     return pr.success(left);
 }
 
-bool Parser::nextIsAssignment() {
+bool Parser::nextIsAssignment() const {
     return peekToken(0).matches(tokens::EQUAL);
 }

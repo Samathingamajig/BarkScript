@@ -11,11 +11,11 @@ std::unordered_map<std::string, spObject> globalConstantVariablesTable = {
     { "false", Boolean(false) },
 };
 
-bool isGlobalConstantVariable(std::string identifier) {
+bool isGlobalConstantVariable(const std::string& identifier) {
     return globalConstantVariablesTable.find(identifier) != globalConstantVariablesTable.end();
 }
 
-spObject SymbolTable::get(std::string key) {
+spObject SymbolTable::get(const std::string& key) const {
     if (isGlobalConstantVariable(key)) {
         return globalConstantVariablesTable.at(key);
     }
@@ -32,12 +32,12 @@ spObject SymbolTable::get(std::string key) {
     }
 }
 
-SymbolTableSetReturnCode SymbolTable::set(std::string key, spObject value, bool currentContext) {
+SymbolTableSetReturnCode SymbolTable::set(const std::string& key, const spObject& value, const bool forceCurrentContext) {
     // Returning `false` signifies that there was an error
     if (isGlobalConstantVariable(key)) {
         return SymbolTableSetReturnCode::errorGlobalConstantVariable;
     }
-    if (currentContext) {
+    if (forceCurrentContext) {
         symbols[key] = value;
         return SymbolTableSetReturnCode::perfect;
     } else {
@@ -53,7 +53,7 @@ SymbolTableSetReturnCode SymbolTable::set(std::string key, spObject value, bool 
     }
 }
 
-bool SymbolTable::exists(std::string key, bool deepSearch) {
+bool SymbolTable::exists(const std::string& key, const bool deepSearch) const {
     if (symbols.find(key) != symbols.end()) {
         return true;
     } else if (deepSearch && parent != nullptr) {

@@ -42,11 +42,11 @@ struct Object {
     Position positionEnd;
     spContext context;
 
-    void setPosition(Position positionStart, Position positionEnd);
-    void setContext(spContext context);
+    void setPosition(const Position& positionStart, const Position& positionEnd);
+    void setContext(const spContext& context);
 
-    std::string virtual to_string() { return "to_string is not implemented for type " + this->type; };
-    spObject virtual copy() = 0;
+    std::string virtual to_string() const { return "to_string is not implemented for type " + this->type; };
+    spObject virtual copy() const = 0;
 
     RuntimeResult virtual binary_plus(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_plus for " + this->type + " is not implemented!", this->context)); };
     RuntimeResult virtual binary_minus(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_minus for " + this->type + " is not implemented!", this->context)); };
@@ -58,10 +58,10 @@ struct Object {
     RuntimeResult virtual unary_plus() { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "unary_plus for " + this->type + " is not implemented!", this->context)); };
     RuntimeResult virtual unary_minus() { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "unary_minus for " + this->type + " is not implemented!", this->context)); };
 
-    RuntimeResult toOther(spObject other);
-    RuntimeResult virtual toNumber() { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "toNumber for " + this->type + " is not implemented!", this->context)); }
-    RuntimeResult virtual toBoolean() { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "toBoolean for " + this->type + " is not implemented!", this->context)); }
-    RuntimeResult toNull();
+    RuntimeResult toOther(spObject other) const;
+    RuntimeResult virtual toNumber() const { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "toNumber for " + this->type + " is not implemented!", this->context)); }
+    RuntimeResult virtual toBoolean() const { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "toBoolean for " + this->type + " is not implemented!", this->context)); }
+    RuntimeResult toNull() const;
 
     virtual operator spObject() = 0;
     // All children should have the code below
@@ -72,11 +72,11 @@ struct Object {
 
 struct Number : Object {
     Number() { this->type = "Number"; };
-    Number(double value, bool sign = +1);
-    Number(std::string value, bool sign = +1);
+    Number(const double& value, const bool sign = +1);
+    Number(const std::string& value, const bool sign = +1);
 
-    std::string to_string() override;
-    spObject copy() override;
+    std::string to_string() const override;
+    spObject copy() const override;
 
     RuntimeResult binary_plus(spObject other) override;
     RuntimeResult binary_minus(spObject other) override;
@@ -88,8 +88,8 @@ struct Number : Object {
     RuntimeResult unary_plus() override;
     RuntimeResult unary_minus() override;
 
-    RuntimeResult toNumber() override;
-    RuntimeResult toBoolean() override;
+    RuntimeResult toNumber() const override;
+    RuntimeResult toBoolean() const override;
 
     operator spObject() override {
         return makeSharedObject(*this);
@@ -98,13 +98,13 @@ struct Number : Object {
 
 struct Boolean : Number {
     Boolean() { this->type = "Boolean"; this->isPureZero = 0; this->isPureDouble = true; }
-    Boolean(bool value);
+    Boolean(const bool value);
 
-    std::string to_string() override;
-    spObject copy() override;
+    std::string to_string() const override;
+    spObject copy() const override;
 
-    RuntimeResult toNumber() override;
-    RuntimeResult toBoolean() override;
+    RuntimeResult toNumber() const override;
+    RuntimeResult toBoolean() const override;
 
     operator spObject() override {
         return makeSharedObject(*this);
@@ -114,8 +114,8 @@ struct Boolean : Number {
 struct Null : Object {
     Null() { this->type = "Null"; }
 
-    std::string to_string() override;
-    spObject copy() override;
+    std::string to_string() const override;
+    spObject copy() const override;
 
     RuntimeResult binary_plus(spObject other) override;
     RuntimeResult binary_minus(spObject other) override;
@@ -127,8 +127,8 @@ struct Null : Object {
     RuntimeResult unary_plus() override;
     RuntimeResult unary_minus() override;
 
-    RuntimeResult toNumber() override;
-    RuntimeResult toBoolean() override;
+    RuntimeResult toNumber() const override;
+    RuntimeResult toBoolean() const override;
 
     operator spObject() override {
         return makeSharedObject(*this);
