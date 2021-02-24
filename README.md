@@ -37,3 +37,7 @@ More long term goals include:
 ## Contributions
 
 Contributions are welcome, ESPECIALLY if I'm doing something wrong, just please remember to keep the code style and file structure consistent (if you add files, remember to modify the project files [1](https://github.com/Samathingamajig/BarkScript/blob/main/BarkScript.vcxproj) [2](https://github.com/Samathingamajig/BarkScript/blob/main/BarkScript.vcxproj.filters))
+
+## License
+
+All code in this repository is under the MIT license, except code in the [/vendor](https://github.com/Samathingamajig/BarkScript/tree/main/vendor) folder. [strings_with_arrows.h](https://github.com/Samathingamajig/BarkScript/blob/main/vendor/strings_with_arrows/strings_with_arrows.h) is a translation from Python3 [here](https://github.com/davidcallanan/py-myopl-code/blob/master/ep14/strings_with_arrows.py) by [David Callanan](https://github.com/davidcallanan).

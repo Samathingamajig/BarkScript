@@ -3,9 +3,11 @@
 #define STRINGS_WITH_ARROWS_H
 #include <string>
 #include <regex>
-#include "../position/position.h"
+#include "../../position/position.h"
 
 // Translation from python: https://github.com/davidcallanan/py-myopl-code/blob/master/ep2/strings_with_arrows.py
+// Code is originally under the MIT License, copyright David Callanan 2019
+// https://github.com/davidcallanan/py-myopl-code/blob/master/LICENSE
 inline std::string strings_with_arrows(const std::string& text, const Position& positionStart, const Position& positionEnd) {
     std::string result = "";
 
