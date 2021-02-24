@@ -9,7 +9,7 @@
 #include "interpreter/interpreter.h"
 #include "context/context.h"
 
-const std::string bsversion = "0.1.6";
+const std::string bsversion = "0.1.6.1";
 
 enum optionIndex { CLI_UNKNOWN, CLI_HELP, CLI_NODEBUG };
 const option::Descriptor usage[] =
@@ -74,22 +74,21 @@ int main(int argc, char* argv[]) {
                 std::cout << abSyTree.error->to_string() << std::endl;
                 std::cout << "--------------------------" << std::endl;
                 continue;
-            } else {
-                if (printDebug) {
-                    std::cout << std::endl;
-                    std::cout << abSyTree.node->to_string() << std::endl;
-                    std::cout << std::endl;
-                }
-
-                Interpreter interpreter;
-                RuntimeResult rt = interpreter.visit(abSyTree.node, context);
-                if (rt.hasError()) {
-                    std::cout << rt.error->to_string() << std::endl;
-                    std::cout << "--------------------------" << std::endl;
-                } else {
-                    std::cout << rt.object->to_string() << std::endl;
-                }
             }
+            if (printDebug) {
+                std::cout << std::endl;
+                std::cout << abSyTree.node->to_string() << std::endl;
+                std::cout << std::endl;
+            }
+
+            Interpreter interpreter;
+            RuntimeResult rt = interpreter.visit(abSyTree.node, context);
+            if (rt.hasError()) {
+                std::cout << rt.error->to_string() << std::endl;
+                std::cout << "--------------------------" << std::endl;
+                continue;
+            }
+            std::cout << rt.object->to_string() << std::endl;
         }
         if (printDebug) std::cout << "--------------------------" << std::endl;
     }
