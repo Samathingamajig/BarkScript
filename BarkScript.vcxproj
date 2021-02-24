@@ -156,7 +156,7 @@
     <ClInclude Include="parser/parser.h" />
     <ClInclude Include="position/position.h" />
     <ClInclude Include="reservedwords/reservedwords.h" />
-    <ClInclude Include="strings_with_arrows/strings_with_arrows.h" />
+    <ClInclude Include="vendor/strings_with_arrows/strings_with_arrows.h" />
     <ClInclude Include="symboltable/symboltable.h" />
     <ClInclude Include="token/token.h" />
     <ClInclude Include="token/tokens.h" />

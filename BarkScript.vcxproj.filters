@@ -57,7 +57,7 @@
     <ClInclude Include="position/position.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="strings_with_arrows/strings_with_arrows.h">
+    <ClInclude Include="vendor/strings_with_arrows/strings_with_arrows.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="interpreter/interpreter.h">

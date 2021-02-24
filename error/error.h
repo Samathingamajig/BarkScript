@@ -4,7 +4,7 @@
 #include <string>
 #include "../position/position.h"
 #include "../context/context.h"
-#include "../strings_with_arrows/strings_with_arrows.h"
+#include "../vendor/strings_with_arrows/strings_with_arrows.h"
 
 namespace errortypes {
     using namespace std;
