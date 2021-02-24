@@ -110,7 +110,7 @@ RuntimeResult Number::binary_plus(spObject other) {
     }
 
     if (this->isNaN || other->isNaN) return rt.success(Number("NaN"));
-    if (this->isInfinity || other->isInfinity) {
+    if (this->isInfinity && other->isInfinity) {
         if (this->sign == other->sign) {
             return rt.success(Number("Infinity", this->sign));
         } else {
@@ -119,6 +119,8 @@ RuntimeResult Number::binary_plus(spObject other) {
             return rt.success(Number("NaN", 0));
         }
     }
+    if (this->isInfinity || other->isInfinity)
+        return rt.success(Number("Infinity", this->isInfinity ? this->sign : other->sign));
     double result = this->doubleValue + other->doubleValue;
     if (didOverflow(result)) return rt.success(Number("Infinity", +1));
     if (didUnderflow(result)) return rt.success(Number("Infinity", -0));
@@ -138,7 +140,7 @@ RuntimeResult Number::binary_minus(spObject other) {
     }
 
     if (this->isNaN || other->isNaN) return rt.success(Number("NaN"));
-    if (this->isInfinity || other->isInfinity) {
+    if (this->isInfinity && other->isInfinity) {
         if (this->sign != other->sign) {
             return rt.success(Number("Infinity", this->sign));
         } else {
@@ -147,6 +149,8 @@ RuntimeResult Number::binary_minus(spObject other) {
             return rt.success(Number("NaN"));
         }
     }
+    if (this->isInfinity || other->isInfinity)
+        return rt.success(Number("Infinity", this->isInfinity ? this->sign : !other->sign));
     double result = this->doubleValue - other->doubleValue;
     if (didOverflow(result)) return rt.success(Number("Infinity", +1));
     if (didUnderflow(result)) return rt.success(Number("Infinity", -0));
