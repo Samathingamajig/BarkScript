@@ -12,8 +12,20 @@ bool didUnderflow(const double& value) {
 }
 
 template <class T>
-RuntimeResult notImplemented(RuntimeResult& rt, const T& self, spObject other, const std::string&& function, const std::string& extra = "") {
-    return rt.failure(RuntimeError(self->positionStart, other->positionEnd, function + " is not implemented between " + self->type + " and " + other->type + "!" + (extra.size() > 0 ? " (" + extra + ")" : ""), self->context));
+RuntimeResult notSupported(RuntimeResult& rt, const T& self, spObject other, const std::string& function, const std::string& extra) {
+    return rt.failure(TypeError(self->positionStart, other->positionEnd, function + " is not supported between the types \"" + self->type + "\" and \"" + other->type + "\"!" + (extra.size() > 0 ? " (" + extra + ")" : ""), self->context));
+}
+
+template <class T>
+RuntimeResult notSupportedNoRT(const T& self, spObject other, const std::string&& function, const std::string& extra) {
+    RuntimeResult rt;
+    return notSupported(rt, self, other, function, extra);
+}
+
+template <class T>
+RuntimeResult notSupportedNoRT(const T& self, const std::string&& function, const std::string& extra) {
+    RuntimeResult rt;
+    return rt.failure(TypeError(self->positionStart, self->positionEnd, function + " is not supported for the type \"" + self->type + "\"!" + (extra.size() > 0 ? " (" + extra + ")" : ""), self->context));
 }
 
 void Object::setPosition(const Position& positionStart, const Position& positionEnd) {
@@ -23,6 +35,10 @@ void Object::setPosition(const Position& positionStart, const Position& position
 
 void Object::setContext(const spContext& context) {
     this->context = context;
+}
+
+RuntimeResult Object::unary_bang() const {
+    return RuntimeResult().success(Boolean(!this->to_bool()));
 }
 
 RuntimeResult Object::toOther(spObject other) const {
@@ -84,6 +100,10 @@ std::string Number::to_string() const {
     return out.str();
 }
 
+bool Number::to_bool() const {
+    return !(this->isPureZero || this->isNaN);
+}
+
 spObject Number::copy() const {
     spObject other = Number();
     other->doubleValue = this->doubleValue;
@@ -103,7 +123,7 @@ RuntimeResult Number::binary_plus(spObject other) {
     if (other->type != objecttypes::Number) {
         spObject tempOther = rt.registerRT(other->toNumber());
         if (rt.hasError()) {
-            return notImplemented(rt, this, other, "binary_plus", rt.error->details);
+            return notSupported(rt, this, other, "binary_plus");
         } else {
             other = tempOther;
         }
@@ -116,7 +136,7 @@ RuntimeResult Number::binary_plus(spObject other) {
         } else {
             // Infinity + -Infinity, and -Infinity + Infinity, are both proven impossible
             // so we need to return NaN
-            return rt.success(Number("NaN", 0));
+            return rt.success(Number("NaN"));
         }
     }
     if (this->isInfinity || other->isInfinity)
@@ -133,7 +153,7 @@ RuntimeResult Number::binary_minus(spObject other) {
     if (other->type != objecttypes::Number) {
         spObject tempOther = rt.registerRT(other->toNumber());
         if (rt.hasError()) {
-            return notImplemented(rt, this, other, "binary_minus", rt.error->details);
+            return notSupported(rt, this, other, "binary_minus");
         } else {
             other = tempOther;
         }
@@ -163,7 +183,7 @@ RuntimeResult Number::binary_asterisk(spObject other) {
     if (other->type != objecttypes::Number) {
         spObject tempOther = rt.registerRT(other->toNumber());
         if (rt.hasError()) {
-            return notImplemented(rt, this, other, "binary_asterisk", rt.error->details);
+            return notSupported(rt, this, other, "binary_asterisk");
         } else {
             other = tempOther;
         }
@@ -192,7 +212,7 @@ RuntimeResult Number::binary_f_slash(spObject other) {
     if (other->type != objecttypes::Number) {
         spObject tempOther = rt.registerRT(other->toNumber());
         if (rt.hasError()) {
-            return notImplemented(rt, this, other, "binary_f_slash", rt.error->details);
+            return notSupported(rt, this, other, "binary_f_slash");
         } else {
             other = tempOther;
         }
@@ -215,7 +235,7 @@ RuntimeResult Number::binary_double_asterisk(spObject other) {
     if (other->type != objecttypes::Number) {
         spObject tempOther = rt.registerRT(other->toNumber());
         if (rt.hasError()) {
-            return notImplemented(rt, this, other, "binary_double_asterisk", rt.error->details);
+            return notSupported(rt, this, other, "binary_double_asterisk");
         } else {
             other = tempOther;
         }
@@ -239,7 +259,7 @@ RuntimeResult Number::binary_double_f_slash(spObject other) {
     if (other->type != objecttypes::Number) {
         spObject tempOther = rt.registerRT(other->toNumber());
         if (rt.hasError()) {
-            return notImplemented(rt, this, other, "binary_double_f_slash", rt.error->details);
+            return notSupported(rt, this, other, "binary_double_f_slash");
         } else {
             other = tempOther;
         }
@@ -271,12 +291,128 @@ RuntimeResult Number::unary_minus() {
     return rt.success(Number(this->doubleValue * -1));
 }
 
+RuntimeResult Number::binary_double_equal(spObject other) {
+    RuntimeResult rt;
+
+    if (other->type != objecttypes::Number) {
+        spObject tempOther = rt.registerRT(other->toNumber());
+        if (rt.hasError()) {
+            rt.error = nullptr;
+            return rt.success(Boolean(false));
+        } else {
+            other = tempOther;
+        }
+    }
+
+    return rt.success(Boolean(
+        (this->doubleValue == other->doubleValue)
+        && (this->sign == other->sign)
+        && (this->isInfinity == other->isInfinity)
+        && (this->isNaN == other->isNaN))
+    );
+}
+
+RuntimeResult Number::binary_bang_equal(spObject other) {
+    RuntimeResult rt;
+
+    if (other->type != objecttypes::Number) {
+        spObject tempOther = rt.registerRT(other->toNumber());
+        if (rt.hasError()) {
+            rt.error = nullptr;
+            return rt.success(Boolean(true));
+        } else {
+            other = tempOther;
+        }
+    }
+
+    return rt.success(Boolean(
+        (this->doubleValue != other->doubleValue)
+        || (this->sign != other->sign)
+        || (this->isInfinity != other->isInfinity)
+        || (this->isNaN != other->isNaN))
+    );
+}
+
+RuntimeResult Number::binary_less_than(spObject other) {
+    RuntimeResult rt;
+
+    if (other->type != objecttypes::Number) {
+        spObject tempOther = rt.registerRT(other->toNumber());
+        if (rt.hasError()) {
+            return notSupported(rt, this, other, "binary_less_than");
+        } else {
+            other = tempOther;
+        }
+    }
+
+    if (this->isNaN || other->isNaN) return rt.success(Boolean(false));
+    if ((this->isInfinity && this->sign == -0) && (other->isInfinity && other->sign == +1)) return rt.success(Boolean(true));
+    if (this->isInfinity || other->isInfinity) return rt.success(Boolean(false));
+    if (this->isPureZero && other->isPureZero) return rt.success(Boolean(false));
+    return rt.success(Boolean(this->doubleValue < other->doubleValue));
+}
+
+RuntimeResult Number::binary_less_than_equal(spObject other) {
+    RuntimeResult rt;
+
+    if (other->type != objecttypes::Number) {
+        spObject tempOther = rt.registerRT(other->toNumber());
+        if (rt.hasError()) {
+            return notSupported(rt, this, other, "binary_less_than_equal");
+        } else {
+            other = tempOther;
+        }
+    }
+
+    spObject lessThan = rt.registerRT(this->binary_less_than(other));
+    if (rt.hasError()) return rt;
+    if (!lessThan->isPureZero) return rt.success(lessThan);
+    return this->binary_double_equal(other);
+}
+
+RuntimeResult Number::binary_greater_than(spObject other) {
+    RuntimeResult rt;
+
+    if (other->type != objecttypes::Number) {
+        spObject tempOther = rt.registerRT(other->toNumber());
+        if (rt.hasError()) {
+            return notSupported(rt, this, other, "binary_greater_than");
+        } else {
+            other = tempOther;
+        }
+    }
+
+    if (this->isNaN || other->isNaN) return rt.success(Boolean(false));
+    if ((this->isInfinity && this->sign == +1) && (other->isInfinity && other->sign == -0)) return rt.success(Boolean(true));
+    if (this->isInfinity || other->isInfinity) return rt.success(Boolean(false));
+    if (this->isPureZero && other->isPureZero) return rt.success(Boolean(false));
+    return rt.success(Boolean(this->doubleValue > other->doubleValue));
+}
+
+RuntimeResult Number::binary_greater_than_equal(spObject other) {
+    RuntimeResult rt;
+
+    if (other->type != objecttypes::Number) {
+        spObject tempOther = rt.registerRT(other->toNumber());
+        if (rt.hasError()) {
+            return notSupported(rt, this, other, "binary_greater_than_equal");
+        } else {
+            other = tempOther;
+        }
+    }
+
+    spObject greaterThan = rt.registerRT(this->binary_greater_than(other));
+    if (rt.hasError()) return rt;
+    if (!greaterThan->isPureDouble) return rt.success(greaterThan);
+    return this->binary_double_equal(other);
+}
+
 RuntimeResult Number::toNumber() const {
     return RuntimeResult().success(Number(*this));
 }
 
 RuntimeResult Number::toBoolean() const {
-    return RuntimeResult().success(Boolean(!(this->isPureZero || this->isNaN)));
+    return RuntimeResult().success(Boolean(this->to_bool()));
 }
 
 Boolean::Boolean(bool value) {
@@ -290,6 +426,10 @@ std::string Boolean::to_string() const {
     return this->isPureZero ? "false" : "true";
 }
 
+bool Boolean::to_bool() const {
+    return !this->isPureZero;
+}
+
 spObject Boolean::copy() const {
     return Boolean(this->doubleValue);
 }
@@ -299,116 +439,25 @@ RuntimeResult Boolean::toNumber() const {
 }
 
 RuntimeResult Boolean::toBoolean() const {
-    return RuntimeResult().success(Boolean(this->doubleValue != 0.0));
+    return RuntimeResult().success(Boolean(!this->isPureZero));
 }
 
 std::string Null::to_string() const {
     return "null";
 }
 
+bool Null::to_bool() const {
+    return false;
+}
+
 spObject Null::copy() const {
     return Null();
 }
 
-RuntimeResult Null::binary_plus(spObject other) {
-    RuntimeResult rt;
-    if (other->type == "Null") {
-        spObject self = rt.registerRT(this->toNumber());
-        if (rt.hasError()) return rt;
-        spObject tempOther = rt.registerRT(this->toNumber());
-        if (rt.hasError()) return rt;
-        return self->binary_plus(tempOther);
-    }
-    spObject self = rt.registerRT(this->toOther(other));
-    if (rt.hasError()) return notImplemented(rt, this, other, "binary_plus", rt.error->details);
-    return self->binary_plus(other);
+RuntimeResult Null::binary_double_equal(spObject other) {
+    return RuntimeResult().success(Boolean(other->type == "Null"));
 }
 
-RuntimeResult Null::binary_minus(spObject other) {
-    RuntimeResult rt;
-    if (other->type == "Null") {
-        spObject self = rt.registerRT(this->toNumber());
-        if (rt.hasError()) return rt;
-        spObject tempOther = rt.registerRT(this->toNumber());
-        if (rt.hasError()) return rt;
-        return self->binary_minus(tempOther);
-    }
-    spObject self = rt.registerRT(this->toOther(other));
-    if (rt.hasError()) return notImplemented(rt, this, other, "binary_minus", rt.error->details);
-    return self->binary_minus(other);
-}
-
-RuntimeResult Null::binary_asterisk(spObject other) {
-    RuntimeResult rt;
-    if (other->type == "Null") {
-        spObject self = rt.registerRT(this->toNumber());
-        if (rt.hasError()) return rt;
-        spObject tempOther = rt.registerRT(this->toNumber());
-        if (rt.hasError()) return rt;
-        return self->binary_asterisk(tempOther);
-    }
-    spObject self = rt.registerRT(this->toOther(other));
-    if (rt.hasError()) return notImplemented(rt, this, other, "binary_asterisk", rt.error->details);
-    return self->binary_asterisk(other);
-}
-
-RuntimeResult Null::binary_f_slash(spObject other) {
-    RuntimeResult rt;
-    if (other->type == "Null") {
-        spObject self = rt.registerRT(this->toNumber());
-        if (rt.hasError()) return rt;
-        spObject tempOther = rt.registerRT(this->toNumber());
-        if (rt.hasError()) return rt;
-        return self->binary_f_slash(tempOther);
-    }
-    spObject self = rt.registerRT(this->toOther(other));
-    if (rt.hasError()) return notImplemented(rt, this, other, "binary_f_slash", rt.error->details);
-    return self->binary_f_slash(other);
-}
-
-RuntimeResult Null::binary_double_asterisk(spObject other) {
-    RuntimeResult rt;
-    if (other->type == "Null") {
-        spObject self = rt.registerRT(this->toNumber());
-        if (rt.hasError()) return rt;
-        spObject tempOther = rt.registerRT(this->toNumber());
-        if (rt.hasError()) return rt;
-        return self->binary_double_asterisk(tempOther);
-    }
-    spObject self = rt.registerRT(this->toOther(other));
-    if (rt.hasError()) return notImplemented(rt, this, other, "binary_double_asterisk", rt.error->details);
-    return self->binary_double_asterisk(other);
-}
-
-RuntimeResult Null::binary_double_f_slash(spObject other) {
-    RuntimeResult rt;
-    if (other->type == "Null") {
-        spObject self = rt.registerRT(this->toNumber());
-        if (rt.hasError()) return rt;
-        spObject tempOther = rt.registerRT(this->toNumber());
-        if (rt.hasError()) return rt;
-        return self->binary_double_f_slash(tempOther);
-    }
-    spObject self = rt.registerRT(this->toOther(other));
-    if (rt.hasError()) return notImplemented(rt, this, other, "binary_double_f_slash", rt.error->details);
-    return self->binary_double_f_slash(other);
-}
-
-RuntimeResult Null::unary_plus() {
-    return this->toNumber();
-}
-
-RuntimeResult Null::unary_minus() {
-    RuntimeResult rt;
-    spObject self = rt.registerRT(this->toNumber());
-    if (rt.hasError()) return rt;
-    return self->unary_minus();
-}
-
-RuntimeResult Null::toNumber() const {
-    return RuntimeResult().success(Number(0));
-}
-
-RuntimeResult Null::toBoolean() const {
-    return RuntimeResult().success(Boolean(false));
+RuntimeResult Null::binary_bang_equal(spObject other) {
+    return RuntimeResult().success(Boolean(other->type != "Null"));
 }

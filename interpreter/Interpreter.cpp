@@ -95,6 +95,7 @@ RuntimeResult Interpreter::visitVariableRetrievementNode(const spNode& node, con
     if (value == nullptr)
         return rt.failure(RuntimeError(node->positionStart, node->positionEnd, "Variable \"" + variableName + "\" is not defined in the current scope!", context));
     value = value->copy();
+    value->setContext(context);
     value->setPosition(node->positionStart, node->positionEnd);
     return rt.success(value);
 }
@@ -121,6 +122,20 @@ RuntimeResult Interpreter::visitBinaryOperatorNode(const spNode& node, const spC
         result = left->binary_double_asterisk(right);
     } else if (optoken == tokens::DOUBLE_F_SLASH) {
         result = left->binary_double_f_slash(right);
+    } else if (optoken == tokens::DOUBLE_EQUAL) {
+        result = left->binary_double_equal(right);
+    } else if (optoken == tokens::BANG_EQUAL) {
+        result = left->binary_bang_equal(right);
+    } else if (optoken == tokens::LESS_THAN) {
+        result = left->binary_less_than(right);
+    } else if (optoken == tokens::LESS_THAN_EQUAL) {
+        result = left->binary_less_than_equal(right);
+    } else if (optoken == tokens::GREATER_THAN) {
+        result = left->binary_greater_than(right);
+    } else if (optoken == tokens::GREATER_THAN_EQUAL) {
+        result = left->binary_greater_than_equal(right);
+    } else {
+        return result.failure(RuntimeError(node->token.positionStart, node->token.positionEnd, optoken + " is not set up in Interpreter::visitBinaryOperatorNode", context));
     }
 
     if (result.hasError()) return rt.failure(result.error);
@@ -141,6 +156,10 @@ RuntimeResult Interpreter::visitUnaryOperatorNode(const spNode& node, const spCo
         result = object->unary_plus();
     } else if (optoken == tokens::MINUS) {
         result = object->unary_minus();
+    } else if (optoken == tokens::BANG) {
+        result = object->unary_bang();
+    } else {
+        return result.failure(RuntimeError(node->token.positionStart, node->token.positionEnd, optoken + " is not set up in Interpreter::visitUnaryOperatorNode", context));
     }
 
     if (result.hasError()) return rt.failure(result.error);

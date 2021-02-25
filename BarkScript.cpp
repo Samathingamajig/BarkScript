@@ -9,7 +9,7 @@
 #include "interpreter/interpreter.h"
 #include "context/context.h"
 
-const std::string bsversion = "0.1.6.1";
+const std::string bsversion = "0.1.7";
 
 enum optionIndex { CLI_UNKNOWN, CLI_HELP, CLI_NODEBUG };
 const option::Descriptor usage[] =

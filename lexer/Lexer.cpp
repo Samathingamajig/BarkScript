@@ -85,7 +85,46 @@ reset:
         }
         case '=':
         {
+            if (peekChar() == '=') {
+                Position start = position;
+                readChar();
+                token = Token(tokens::DOUBLE_EQUAL, "==", start, position);
+                break;
+            }
             token = Token(tokens::EQUAL, "=", position, position);
+            break;
+        }
+        case '!':
+        {
+            if (peekChar() == '=') {
+                Position start = position;
+                readChar();
+                token = Token(tokens::BANG_EQUAL, "!=", start, position);
+                break;
+            }
+            token = Token(tokens::BANG, "!", position, position);
+            break;
+        }
+        case '<':
+        {
+            if (peekChar() == '=') {
+                Position start = position;
+                readChar();
+                token = Token(tokens::LESS_THAN_EQUAL, "<=", start, position);
+                break;
+            }
+            token = Token(tokens::LESS_THAN, "<", position, position);
+            break;
+        }
+        case '>':
+        {
+            if (peekChar() == '=') {
+                Position start = position;
+                readChar();
+                token = Token(tokens::GREATER_THAN_EQUAL, ">=", start, position);
+                break;
+            }
+            token = Token(tokens::GREATER_THAN, ">", position, position);
             break;
         }
         case ' ':

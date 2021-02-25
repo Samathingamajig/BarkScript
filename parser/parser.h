@@ -53,9 +53,10 @@ struct Parser {
     ParseResult exponent();
     ParseResult factor();
     ParseResult term();
-    ParseResult assignment();
-    ParseResult declaration();
     ParseResult expr();
+    ParseResult assignment();
+    ParseResult compare(bool hasRecursed = false);
+    ParseResult declaration();
     ParseResult statement();
     ParseResult parse();
 
@@ -63,6 +64,7 @@ struct Parser {
     ParseResult binaryOperation(const std::function<ParseResult()>& rule1, const std::vector<std::string>& allowedTokens, const std::function<ParseResult()>& rule2);
 
     bool nextIsAssignment() const;
+    bool nextIsCompare() const;
 };
 
 #endif // !PARSER_H
