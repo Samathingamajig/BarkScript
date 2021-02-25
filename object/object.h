@@ -28,6 +28,15 @@ spObject makeSharedObject(ObjectType&& object) {
 
 struct RuntimeResult;
 
+template <class T>
+extern RuntimeResult notSupported(RuntimeResult& rt, const T& self, spObject other, const std::string& function, const std::string& extra = "");
+
+template <class T>
+extern RuntimeResult notSupportedNoRT(const T& self, spObject other, const std::string&& function, const std::string& extra = "");
+
+template <class T>
+extern RuntimeResult notSupportedNoRT(const T& self, const std::string&& function, const std::string& extra = "");
+
 struct Object {
     std::string stringValue;
     double doubleValue = 0.0;
@@ -46,21 +55,31 @@ struct Object {
     void setContext(const spContext& context);
 
     std::string virtual to_string() const { return "to_string is not implemented for type " + this->type; };
+    bool virtual to_bool() const = 0;
     spObject virtual copy() const = 0;
 
-    RuntimeResult virtual binary_plus(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_plus for " + this->type + " is not implemented!", this->context)); };
-    RuntimeResult virtual binary_minus(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_minus for " + this->type + " is not implemented!", this->context)); };
-    RuntimeResult virtual binary_asterisk(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_asterisk for " + this->type + " is not implemented!", this->context)); };
-    RuntimeResult virtual binary_f_slash(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_f_slash for " + this->type + " is not implemented!", this->context)); };
-    RuntimeResult virtual binary_double_asterisk(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_double_asterisk for " + this->type + " is not implemented!", this->context)); };
-    RuntimeResult virtual binary_double_f_slash(spObject other) { return RuntimeResult().failure(RuntimeError(this->positionStart, other->positionEnd, "binary_double_f_slash for " + this->type + " is not implemented!", this->context)); };
+    RuntimeResult virtual binary_plus(spObject other) { return notSupportedNoRT(this, other, "binary_plus"); };
+    RuntimeResult virtual binary_minus(spObject other) { return notSupportedNoRT(this, other, "binary_minus"); };
+    RuntimeResult virtual binary_asterisk(spObject other) { return notSupportedNoRT(this, other, "binary_asterisk"); };
+    RuntimeResult virtual binary_f_slash(spObject other) { return notSupportedNoRT(this, other, "binary_f_slash"); };
+    RuntimeResult virtual binary_double_asterisk(spObject other) { return notSupportedNoRT(this, other, "binary_double_asterisk"); };
+    RuntimeResult virtual binary_double_f_slash(spObject other) { return notSupportedNoRT(this, other, "binary_double_f_slash"); };
 
-    RuntimeResult virtual unary_plus() { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "unary_plus for " + this->type + " is not implemented!", this->context)); };
-    RuntimeResult virtual unary_minus() { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "unary_minus for " + this->type + " is not implemented!", this->context)); };
+    RuntimeResult virtual unary_plus() { return notSupportedNoRT(this, "unary_plus"); };
+    RuntimeResult virtual unary_minus() { return notSupportedNoRT(this, "unary_minus"); };
+
+    RuntimeResult unary_bang() const;
+
+    RuntimeResult virtual binary_double_equal(spObject other) { return notSupportedNoRT(this, other, "binary_double_equal"); };
+    RuntimeResult virtual binary_bang_equal(spObject other) { return notSupportedNoRT(this, other, "binary_bang_equal"); };
+    RuntimeResult virtual binary_less_than(spObject other) { return notSupportedNoRT(this, other, "binary_less_than"); };
+    RuntimeResult virtual binary_less_than_equal(spObject other) { return notSupportedNoRT(this, other, "binary_less_than_equal"); };
+    RuntimeResult virtual binary_greater_than(spObject other) { return notSupportedNoRT(this, other, "binary_greater_than"); };
+    RuntimeResult virtual binary_greater_than_equal(spObject other) { return notSupportedNoRT(this, other, "binary_greater_than_equal"); };
 
     RuntimeResult toOther(spObject other) const;
-    RuntimeResult virtual toNumber() const { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "toNumber for " + this->type + " is not implemented!", this->context)); }
-    RuntimeResult virtual toBoolean() const { return RuntimeResult().failure(RuntimeError(this->positionStart, this->positionEnd, "toBoolean for " + this->type + " is not implemented!", this->context)); }
+    RuntimeResult virtual toNumber() const { return notSupportedNoRT(this, "toNumber"); }
+    RuntimeResult virtual toBoolean() const { return notSupportedNoRT(this, "toBoolean"); }
     RuntimeResult toNull() const;
 
     virtual operator spObject() = 0;
@@ -76,6 +95,7 @@ struct Number : Object {
     Number(const std::string& value, const bool sign = +1);
 
     std::string to_string() const override;
+    bool to_bool() const override;
     spObject copy() const override;
 
     RuntimeResult binary_plus(spObject other) override;
@@ -87,6 +107,13 @@ struct Number : Object {
 
     RuntimeResult unary_plus() override;
     RuntimeResult unary_minus() override;
+
+    RuntimeResult binary_double_equal(spObject other) override;
+    RuntimeResult binary_bang_equal(spObject other) override;
+    RuntimeResult binary_less_than(spObject other) override;
+    RuntimeResult binary_less_than_equal(spObject other) override;
+    RuntimeResult binary_greater_than(spObject other) override;
+    RuntimeResult binary_greater_than_equal(spObject other) override;
 
     RuntimeResult toNumber() const override;
     RuntimeResult toBoolean() const override;
@@ -101,6 +128,7 @@ struct Boolean : Number {
     Boolean(const bool value);
 
     std::string to_string() const override;
+    bool to_bool() const override;
     spObject copy() const override;
 
     RuntimeResult toNumber() const override;
@@ -115,20 +143,11 @@ struct Null : Object {
     Null() { this->type = "Null"; }
 
     std::string to_string() const override;
+    bool to_bool() const override;
     spObject copy() const override;
 
-    RuntimeResult binary_plus(spObject other) override;
-    RuntimeResult binary_minus(spObject other) override;
-    RuntimeResult binary_asterisk(spObject other) override;
-    RuntimeResult binary_f_slash(spObject other) override;
-    RuntimeResult binary_double_asterisk(spObject other) override;
-    RuntimeResult binary_double_f_slash(spObject other) override;
-
-    RuntimeResult unary_plus() override;
-    RuntimeResult unary_minus() override;
-
-    RuntimeResult toNumber() const override;
-    RuntimeResult toBoolean() const override;
+    RuntimeResult binary_double_equal(spObject other) override;
+    RuntimeResult binary_bang_equal(spObject other) override;
 
     operator spObject() override {
         return makeSharedObject(*this);

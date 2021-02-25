@@ -12,6 +12,7 @@ namespace errortypes {
     const string IllegalCharError = "IllegalCharError";
     const string InvalidSyntaxError = "InvalidSyntaxError";
     const string RuntimeError = "RuntimeError";
+    const string TypeError = "TypeError";
 }
 
 struct Error;
@@ -89,6 +90,8 @@ struct InvalidSyntaxError : Error {
 struct RuntimeError : Error {
     spContext context;
 
+    RuntimeError() {}
+
     RuntimeError(const Position& positionStart, const Position& positionEnd, const std::string&& details, const spContext& context) {
         this->positionStart = positionStart;
         this->positionEnd = positionEnd;
@@ -117,6 +120,20 @@ struct RuntimeError : Error {
         }
 
         return "Traceback (most recent call last):\n" + output;
+    }
+
+    operator spError() override {
+        return makeSharedError(*this);
+    }
+};
+
+struct TypeError : RuntimeError {
+    TypeError(const Position& positionStart, const Position& positionEnd, const std::string&& details, const spContext& context) {
+        this->type = errortypes::TypeError;
+        this->positionStart = positionStart;
+        this->positionEnd = positionEnd;
+        this->details = details;
+        this->context = context;
     }
 
     operator spError() override {

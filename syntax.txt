@@ -1,21 +1,24 @@
 statement   : declaration
-            : expr
+            : compare
 
-declaration : KEYWORD:LET IDENTIFIER EQUAL expr
+declaration : KEYWORD:LET IDENTIFIER EQUAL assignment
             : KEYWORD:LET IDENTIFIER
 
-expr        : assignment
-            : term ((PLUS|MINUS) term)*
+assignment  : IDENTIFIER EQUAL compare
+            : compare
 
-assignment  : IDENTIFIER EQUAL expr
+compare     : (compare (DOUBLE_EQUAL|BANG_EQUAL|LESS_THAN|LESS_THAN_EQUAL|GREATER_THAN|GREATER_THAN_EQUAL))* expr
+
+expr        : term ((PLUS|MINUS) term)*
 
 term        : factor ((ASTERISK|F_SLASH|DOUBLE_F_SLASH) factor)*
 
 factor      : (PLUS|MINUS) factor
             : exponent
 
-exponent    : atom (DOUBLE_ASTERISK factor)
+exponent    : atom (DOUBLE_ASTERISK factor)?
 
-atom        : NUMBER
+atom        : BANG atom
+            : NUMBER
             : IDENTIFIER
-            : OPEN_PAREN expr CLOSE_PAREN
+            : OPEN_PAREN assignment CLOSE_PAREN
