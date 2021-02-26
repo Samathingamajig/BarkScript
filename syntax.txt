@@ -1,10 +1,13 @@
 statement   : declaration
-            : compare
+            : lambda_func
 
 declaration : KEYWORD:LET IDENTIFIER EQUAL assignment
             : KEYWORD:LET IDENTIFIER
 
-assignment  : IDENTIFIER EQUAL compare
+assignment  : IDENTIFIER EQUAL lambda_func
+            : lambda_func
+
+lambda_func : (IDENTIFIER | OPEN_PAREN (IDENTIFIER (COMMA IDENTIFIER)* COMMA?)? CLOSE_PAREN) EQUAL_GREATER_THAN lambda_func
             : compare
 
 compare     : (compare (DOUBLE_EQUAL|BANG_EQUAL|LESS_THAN|LESS_THAN_EQUAL|GREATER_THAN|GREATER_THAN_EQUAL))* expr

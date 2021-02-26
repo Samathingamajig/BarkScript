@@ -2,6 +2,7 @@
 #ifndef AST_H
 #define AST_H
 #include <string>
+#include <vector>
 #include <memory>
 #include "../token/token.h"
 #include "../position/position.h"
@@ -17,6 +18,7 @@ namespace nodetypes {
     const string BinaryOperator = "BINOP";
     const string UnaryOperator = "UNOP";
     const string Error = "ERROR";
+    const string LambdaFunction = "LAMFUN";
 };
 
 struct Node;
@@ -52,6 +54,7 @@ struct Node {
     spNode leftNode;
     spNode rightNode;
     spNode valueNode;
+    std::vector<Token> identifierList;
 };
 
 struct NumberNode : Node {
@@ -169,6 +172,41 @@ struct ErrorNode : Node {
 
     std::string to_string() const override {
         return token.value;
+    }
+
+    operator spNode() override {
+        return makeSharedNode(*this);
+    }
+};
+
+struct LambdaFunctionNode : Node {
+    LambdaFunctionNode(const Token& identifier, const Token& token, const spNode& expression) {
+        this->nodeType = nodetypes::LambdaFunction;
+        this->identifierList = { identifier };
+        this->token = token;
+        this->rightNode = expression;
+        this->positionStart = identifier.positionStart;
+        this->positionEnd = expression->positionEnd;
+    }
+
+    LambdaFunctionNode(const Token& leftParen, const std::vector<Token>& identifierList, const Token& token, const spNode& expression) {
+        this->nodeType = nodetypes::LambdaFunction;
+        this->identifierList = identifierList;
+        this->token = token;
+        this->rightNode = expression;
+        this->positionStart = leftParen.positionStart;
+        this->positionEnd = expression->positionEnd;
+    }
+
+    std::string to_string() const override {
+        std::string idents = "";
+        if (identifierList.size() > 0) {
+            idents += identifierList[0].value;
+            for (std::size_t i = 1; i < identifierList.size(); i++) {
+                idents += ", " + identifierList[i].value;
+            }
+        }
+        return "(" + idents + ") => " + rightNode->to_string();
     }
 
     operator spNode() override {

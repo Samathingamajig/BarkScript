@@ -28,6 +28,10 @@ namespace tokens {
     const string GREATER_THAN = "GREATER_THAN"; // >
     const string GREATER_THAN_EQUAL = "GREATER_THAN_EQUAL"; // >=
 
+    // Special
+    const string EQUAL_GREATER_THAN = "EQUAL_GREATER_THAN"; // =>
+    const string COMMA = "COMMA"; // ,
+
     // Keywords and Random Identifiers
     const string KEYWORD = "KEYWORD";
     const string IDENTIFIER = "IDENTIFIER";

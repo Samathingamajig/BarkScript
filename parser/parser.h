@@ -56,6 +56,7 @@ struct Parser {
     ParseResult expr();
     ParseResult assignment();
     ParseResult compare(bool hasRecursed = false);
+    ParseResult lambda_func();
     ParseResult declaration();
     ParseResult statement();
     ParseResult parse();

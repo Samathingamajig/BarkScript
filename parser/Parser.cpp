@@ -43,7 +43,7 @@ ParseResult Parser::atom() {
         spNode value = pr.registerPR(atom());
         if (pr.hasError()) return pr;
         return pr.success(UnaryOperatorNode(token, value));
-} else if (token.type == tokens::NUMBER) {
+    } else if (token.type == tokens::NUMBER) {
         nextToken();
         pr.registerAdvancement();
         return pr.success(NumberNode(token));
@@ -114,6 +114,64 @@ ParseResult Parser::compare(bool hasRecursed) {
     return binaryOperation(rule1, { DOUBLE_EQUAL, BANG_EQUAL, LESS_THAN, LESS_THAN_EQUAL, GREATER_THAN, GREATER_THAN_EQUAL }, rule2);
 }
 
+ParseResult Parser::lambda_func() {
+    if (!currentToken.matches(tokens::IDENTIFIER) && !currentToken.matches(tokens::OPEN_PAREN))
+        return compare();
+    if (currentToken.matches(tokens::IDENTIFIER)) {
+        if (!peekToken().matches(tokens::EQUAL_GREATER_THAN))
+            return compare();
+        ParseResult pr;
+        Token ident = currentToken;
+        nextToken();
+        pr.registerAdvancement();
+        Token token = currentToken;
+        nextToken();
+        pr.registerAdvancement();
+        spNode expression = pr.registerPR(lambda_func());
+        if (pr.hasError()) return pr;
+        return pr.success(LambdaFunctionNode({ ident }, token, expression));
+    }
+    if (peekToken().matches(tokens::IDENTIFIER) && peekToken(1).matches(tokens::CLOSE_PAREN) && !peekToken(2).matches(tokens::EQUAL_GREATER_THAN))
+        return compare();
+    ParseResult pr;
+    Token leftParen = currentToken;
+    nextToken();
+    pr.registerAdvancement();
+    std::vector<Token> identifierList;
+    if (currentToken.matches(tokens::IDENTIFIER)) {
+        identifierList.push_back(currentToken);
+        nextToken();
+        pr.registerAdvancement();
+        while (!currentToken.matches(tokens::CLOSE_PAREN)) {
+            if (!currentToken.matches(tokens::COMMA))
+                return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a ',' or a ')'"));
+            nextToken();
+            pr.registerAdvancement();
+            if (currentToken.matches(tokens::CLOSE_PAREN)) break;
+            if (!currentToken.matches(tokens::IDENTIFIER))
+                return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an identifier or a ')'"));
+            identifierList.push_back(currentToken);
+            nextToken();
+            pr.registerAdvancement();
+        }
+        nextToken();
+        pr.registerAdvancement();
+    } else if (!currentToken.matches(tokens::CLOSE_PAREN))
+        return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an identifier or a ')'"));
+    else {
+        nextToken();
+        pr.registerAdvancement();
+    }
+    if (!currentToken.matches(tokens::EQUAL_GREATER_THAN))
+        return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a '=>'"));
+    Token token = currentToken;
+    nextToken();
+    pr.registerAdvancement();
+    spNode expression = pr.registerPR(lambda_func());
+    if (pr.hasError()) return pr;
+    return pr.success(LambdaFunctionNode(leftParen, identifierList, token, expression));
+}
+
 ParseResult Parser::assignment() {
     ParseResult pr;
     if (nextIsAssignment()) {
@@ -126,11 +184,11 @@ ParseResult Parser::assignment() {
             return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an '='"));
         nextToken();
         pr.registerAdvancement();
-        spNode value = pr.registerPR(compare());
+        spNode value = pr.registerPR(lambda_func());
         if (pr.hasError()) return pr;
         return pr.success(VariableAssignmentNode(variableNameToken, value));
     } else {
-        return compare();
+        return lambda_func();
     }
 }
 
@@ -160,7 +218,7 @@ ParseResult Parser::statement() {
     if (currentToken.matches(tokens::KEYWORD, reservedWords::LET)) {
         return declaration();
     } else {
-        ParseResult pr = compare();
+        ParseResult pr = lambda_func();
         if (pr.hasError()) {
             return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a 'let', number, identifier, '+', '-', or a '('"));
         }

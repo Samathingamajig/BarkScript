@@ -90,6 +90,11 @@ reset:
                 readChar();
                 token = Token(tokens::DOUBLE_EQUAL, "==", start, position);
                 break;
+            } else if (peekChar() == '>') {
+                Position start = position;
+                readChar();
+                token = Token(tokens::EQUAL_GREATER_THAN, "=>", start, position);
+                break;
             }
             token = Token(tokens::EQUAL, "=", position, position);
             break;
@@ -125,6 +130,11 @@ reset:
                 break;
             }
             token = Token(tokens::GREATER_THAN, ">", position, position);
+            break;
+        }
+        case ',':
+        {
+            token = Token(tokens::COMMA, ",", position, position);
             break;
         }
         case ' ':
