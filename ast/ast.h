@@ -54,7 +54,7 @@ struct Node {
     spNode leftNode;
     spNode rightNode;
     spNode valueNode;
-    std::vector<Token> identifierList;
+    std::vector<std::string> identifierList;
 };
 
 struct NumberNode : Node {
@@ -182,14 +182,14 @@ struct ErrorNode : Node {
 struct LambdaFunctionNode : Node {
     LambdaFunctionNode(const Token& identifier, const Token& token, const spNode& expression) {
         this->nodeType = nodetypes::LambdaFunction;
-        this->identifierList = { identifier };
+        this->identifierList = { identifier.value };
         this->token = token;
         this->rightNode = expression;
         this->positionStart = identifier.positionStart;
         this->positionEnd = expression->positionEnd;
     }
 
-    LambdaFunctionNode(const Token& leftParen, const std::vector<Token>& identifierList, const Token& token, const spNode& expression) {
+    LambdaFunctionNode(const Token& leftParen, const std::vector<std::string>& identifierList, const Token& token, const spNode& expression) {
         this->nodeType = nodetypes::LambdaFunction;
         this->identifierList = identifierList;
         this->token = token;
@@ -201,9 +201,9 @@ struct LambdaFunctionNode : Node {
     std::string to_string() const override {
         std::string idents = "";
         if (identifierList.size() > 0) {
-            idents += identifierList[0].value;
+            idents += identifierList[0];
             for (std::size_t i = 1; i < identifierList.size(); i++) {
-                idents += ", " + identifierList[i].value;
+                idents += ", " + identifierList[i];
             }
         }
         return "(" + idents + ") => " + rightNode->to_string();

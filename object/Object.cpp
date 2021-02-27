@@ -461,3 +461,31 @@ RuntimeResult Null::binary_double_equal(spObject other) {
 RuntimeResult Null::binary_bang_equal(spObject other) {
     return RuntimeResult().success(Boolean(other->type != "Null"));
 }
+
+LambdaFunction::LambdaFunction() {
+    this->type = "LambdaFunction";
+}
+
+LambdaFunction::LambdaFunction(const std::vector<std::string>& identifierList, const spNode& expression) {
+    this->type = "LambdaFunction";
+    this->identifierList = identifierList;
+    this->expression = expression;
+}
+
+std::string LambdaFunction::to_string() const {
+    std::string idents;
+    if (identifierList.size() > 0) {
+        idents += identifierList[0];
+        for (std::size_t i = 1; i < identifierList.size(); i++)
+            idents += ", " + identifierList[i];
+    }
+    return "<lambda(" + idents + ")>";
+}
+
+bool LambdaFunction::to_bool() const {
+    return true;
+}
+
+spObject LambdaFunction::copy() const {
+    return LambdaFunction(*this);
+}

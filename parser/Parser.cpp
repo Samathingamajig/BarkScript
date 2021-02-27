@@ -2,6 +2,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <unordered_set>
 #include "../token/token.h"
 #include "../token/tokens.h"
 #include "../ast/ast.h"
@@ -133,13 +134,30 @@ ParseResult Parser::lambda_func() {
     }
     if (peekToken().matches(tokens::IDENTIFIER) && peekToken(1).matches(tokens::CLOSE_PAREN) && !peekToken(2).matches(tokens::EQUAL_GREATER_THAN))
         return compare();
+    if (peekToken().matches(tokens::OPEN_PAREN)
+        || (peekToken().matches(tokens::IDENTIFIER) && peekToken(1).matches(tokens::EQUAL_GREATER_THAN))) {
+        ParseResult pr;
+        nextToken();
+        pr.registerAdvancement();
+        spNode value = pr.registerPR(lambda_func());
+        if (pr.hasError()) return pr;
+        if (!currentToken.matches(tokens::CLOSE_PAREN))
+            return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected a ')'"));
+        nextToken();
+        pr.registerAdvancement();
+        return pr.success(value);
+    }
     ParseResult pr;
     Token leftParen = currentToken;
     nextToken();
     pr.registerAdvancement();
-    std::vector<Token> identifierList;
+    std::vector<std::string> identifierList;
     if (currentToken.matches(tokens::IDENTIFIER)) {
-        identifierList.push_back(currentToken);
+        if (isGlobalConstantVariable(currentToken.value))
+            return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "You cannot have a Global Constant Variable as an identifier"));
+        std::unordered_set<std::string> duplicates;
+        identifierList.push_back(currentToken.value);
+        duplicates.insert(currentToken.value);
         nextToken();
         pr.registerAdvancement();
         while (!currentToken.matches(tokens::CLOSE_PAREN)) {
@@ -150,7 +168,12 @@ ParseResult Parser::lambda_func() {
             if (currentToken.matches(tokens::CLOSE_PAREN)) break;
             if (!currentToken.matches(tokens::IDENTIFIER))
                 return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Expected an identifier or a ')'"));
-            identifierList.push_back(currentToken);
+            if (duplicates.find(currentToken.value) != duplicates.end())
+                return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "Duplicate identifier found in lambda function definition"));
+            if (isGlobalConstantVariable(currentToken.value))
+                return pr.failure(InvalidSyntaxError(currentToken.positionStart, currentToken.positionEnd, "You cannot have a Global Constant Variable as an identifier"));
+            identifierList.push_back(currentToken.value);
+            duplicates.insert(currentToken.value);
             nextToken();
             pr.registerAdvancement();
         }

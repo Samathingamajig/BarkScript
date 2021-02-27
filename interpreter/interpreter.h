@@ -30,6 +30,7 @@ struct Interpreter {
     RuntimeResult visitVariableRetrievementNode(const spNode& node, const spContext& context);
     RuntimeResult visitBinaryOperatorNode(const spNode& node, const spContext& context);
     RuntimeResult visitUnaryOperatorNode(const spNode& node, const spContext& context);
+    RuntimeResult visitLambdaFunctionNode(const spNode& node, const spContext& context);
 };
 
 #endif // !INTERPRETER_H

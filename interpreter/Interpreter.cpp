@@ -42,6 +42,8 @@ RuntimeResult Interpreter::visit(const spNode& node, const spContext& context) {
         return visitBinaryOperatorNode(node, context);
     } else if (type == nodetypes::UnaryOperator) {
         return visitUnaryOperatorNode(node, context);
+    } else if (type == nodetypes::LambdaFunction) {
+        return visitLambdaFunctionNode(node, context);
     } else {
         return RuntimeResult().failure(RuntimeError(node->positionStart, node->positionEnd, "Error: node type " + type + " does not have a visit method!", context));
     }
@@ -166,4 +168,15 @@ RuntimeResult Interpreter::visitUnaryOperatorNode(const spNode& node, const spCo
 
     result.object->setPosition(node->positionStart, node->positionEnd);
     return rt.success(result.object);
+}
+
+RuntimeResult Interpreter::visitLambdaFunctionNode(const spNode& node, const spContext& context) {
+    RuntimeResult rt;
+
+
+    spObject lambda = LambdaFunction(node->identifierList, node->rightNode);
+    lambda->setPosition(node->positionStart, node->positionEnd);
+    lambda->setContext(context);
+
+    return rt.success(lambda);
 }

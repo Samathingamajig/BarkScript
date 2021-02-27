@@ -45,6 +45,8 @@ struct Object {
     bool isNaN = false;
     bool isPureDouble = false;
     bool isPureZero = false;
+    std::vector<std::string> identifierList;
+    spNode expression;
 
     std::string type = "UNKNOWN_OBJECT";
     Position positionStart;
@@ -148,6 +150,22 @@ struct Null : Object {
 
     RuntimeResult binary_double_equal(spObject other) override;
     RuntimeResult binary_bang_equal(spObject other) override;
+
+    operator spObject() override {
+        return makeSharedObject(*this);
+    }
+};
+
+struct LambdaFunction : Object {
+    LambdaFunction();
+    LambdaFunction(const std::vector<std::string>& identifierList, const spNode& expression);
+
+    std::string to_string() const override;
+    bool to_bool() const override;
+    spObject copy() const override;
+
+    //RuntimeResult binary_double_equal(spObject other) override;
+    //RuntimeResult binary_bang_equal(spObject other) override;
 
     operator spObject() override {
         return makeSharedObject(*this);
