@@ -23,7 +23,7 @@ The language is currently split into 3 stages:
 
 Refer to the [todo section](https://github.com/Samathingamajig/BarkScript/projects/1) for live goals & progress towards them
 
-More long term goals include:
+More long term goals (in no particular order) include:
 
 - Conversion to some kind of bytecode
 - NPM package that can compile to said bytecode
